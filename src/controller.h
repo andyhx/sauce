@@ -11,6 +11,7 @@ class Controller {
   static void extract(Descriptor* desc, char* dir, char* output);
   static void train(char* pos, char* neg, char* output);
   static void predict(Descriptor* desc, char* set, char* model);
+  static void generate(char* input, char* output, int width, int height, int h_stride, int v_stride);
 };
 
 #endif

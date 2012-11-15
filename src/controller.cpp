@@ -5,6 +5,38 @@ void Controller::show_usage() {
   cout << "./sauce command" << endl;
   cout << "command = extract | train | test" << endl;
 }
+
+void Controller::generate(char* input, char* output, int width, int height, int h_stride, int v_stride) {
+    vector<string> dirs = Controller::listdir(input);
+    int n=0;
+    for(string& s : dirs) {
+      Mat image = imread(s);
+      Mat g;
+      Sobel(image, g, -1, 1, 1);
+      g = abs(g);
+
+      int best = 0;
+      int x=0, y=0;
+      for(int i=0; i<g.rows-height; i+=v_stride) {
+        for(int j=0; j<g.cols-width; j+=h_stride) {
+          Mat windowH = g.rowRange(i, i+height);
+          Mat window = windowH.colRange(j, j+width);
+          Scalar windowSum = sum(window);
+          if(windowSum(0) > best) {
+            best = windowSum(0);
+            x = j;
+            y = i;
+          }
+        }
+      }
+
+      Mat finalWindowH = image.rowRange(y, y+height);
+      Mat finalWindow = finalWindowH.colRange(x, x+width);
+      char buf[1024];
+      sprintf(buf, "%s/%4d.png", output, n++);
+      imwrite(buf, finalWindow);
+    }
+}
   
 void Controller::extract(Descriptor* desc, char* dir, char* output) {
     Mat features(0, 0, CV_32FC1);

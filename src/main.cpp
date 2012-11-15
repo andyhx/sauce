@@ -10,7 +10,32 @@ int main(int argc, char** argv) {
     Controller::show_usage();
     return 0;
   }
-  if(strcmp("extract", argv[1]) == 0) {
+  if(strcmp("generate", argv[1]) == 0) {
+    char* dir = argv[2];
+    char output[1024],width[1024],height[1024],hstride[1024],vstride[1024];
+    int c;
+    while ( (c = getopt(argc, argv, "o:w:h:x:y:")) != -1) {
+      switch(c) {
+        case 'o':
+          strcpy(output, optarg);
+          break;
+        case 'w':
+          strcpy(width, optarg);
+          break;
+        case 'h':
+          strcpy(height, optarg);
+          break;
+        case 'x':
+          strcpy(hstride, optarg);
+          break;
+        case 'y':
+          strcpy(vstride, optarg);
+          break;
+      }
+    }
+    Controller::generate(dir, output, atoi(width), atoi(height), atoi(hstride), atoi(vstride));
+  }
+  else if(strcmp("extract", argv[1]) == 0) {
     char* dir = argv[2];
     char buf[1024];
     int c;
