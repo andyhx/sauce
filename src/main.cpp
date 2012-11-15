@@ -1,106 +1,66 @@
+#include "global.h"
 #include "hog.h"
 #include "controller.h"
+#include "descriptor.h"
 
 int main(int argc, char** argv) {
 
-  auto listdir = [](const char *path) {
-    DIR *pdir = NULL;
-    pdir = opendir(path);
-    struct dirent *pent = NULL;
-
-    vector<string> files;
-    while(pent = readdir(pdir)) {
-      string file(pent->d_name);
-      if(file!="." && file!="..") {
-        file = "/"+file;
-        files.push_back(path + file);
-      }
-    }
-    closedir(pdir);
-    return files;
-  };
 
   if(argc <= 1) {
     Controller::show_usage();
     return 0;
   }
   if(strcmp("extract", argv[1]) == 0) {
-    cout << "extract" << endl;
+    char* dir = argv[2];
+    char buf[1024];
+    int c;
+    while ( (c = getopt(argc, argv, "o:")) != -1) {
+      switch(c) {
+        case 'o':
+          strcpy(buf, optarg);
+          break;
+      }
+    }
+    HOG *hog = new HOG();
+    Controller::extract(hog, dir , buf);
   }
   else if(strcmp("train", argv[1]) == 0) {
-    cout << "train" << endl;
+    char pos[1024], neg[1024], output[1024];
+    int c;
+    while ( (c = getopt(argc, argv, "p:n:o:")) != -1) {
+      switch(c) {
+        case 'p':
+          strcpy(pos, optarg);
+          break;
+        case 'n':
+          strcpy(neg, optarg);
+          break;
+        case 'o':
+          strcpy(output, optarg);
+          break;
+      }
+    }
+    Controller::train(pos, neg, output);
   }
   else if(strcmp("test", argv[1]) == 0) {
-    cout << "test" << endl;
+    char svm[1024],set[1024];
+    int c;
+    while ( (c = getopt(argc, argv, "s:c:")) != -1) {
+      switch(c) {
+        case 's':
+          strcpy(set, optarg);
+          break;
+        case 'c':
+          strcpy(svm, optarg);
+          break;
+      }
+    }
+    HOG* hog = new HOG();
+    Controller::predict(hog, set, svm);
   }
   else {
     Controller::show_usage();
   }
-
-  /*Mat features(0, 0, CV_32FC1);
-  Mat labels(0, 0, CV_32FC1);
-  auto addFeature = [&](Mat sample) {
-    Size s = features.size();
-    if(s.width == 0 && s.height == 0) {
-      features = sample;
-    }
-    else {
-      features.push_back(sample);
-    }
-  };
-
-  vector<string> dirs = listdir("/media/FC1A11C21A117B3A/inz/priv/sanity_test/train/pos");
-  for(string& s : dirs) {
-    Acc acc;
-    acc.m = imread(s);
-    Acc resultAcc = HOG::iterate(HOG::features(), acc);
-    addFeature(resultAcc.m);
-    cout << s << endl;
-  }
-  Mat labelsPos(dirs.size(), 1, CV_32FC1, Scalar::all(1));
-  labels.push_back(labelsPos);
-
-  dirs = listdir("/media/FC1A11C21A117B3A/inz/priv/sanity_test/train/neg");
-  for(string& s : dirs) {
-    Acc acc;
-    acc.m = imread(s);
-    Acc resultAcc = HOG::iterate(HOG::features(), acc);
-    addFeature(resultAcc.m);
-    cout << s << endl;
-  }
-  Mat labelsNeg(dirs.size(), 1, CV_32FC1, Scalar::all(0));
-  labels.push_back(labelsNeg);
-
-  CvSVM svm;
-  CvSVMParams params;
-  params.kernel_type = CvSVM::LINEAR;
-  svm.train(features, labels, Mat(), Mat(), params);
-  svm.save("hogtrain");*/
-
-  /*  CvSVM svm;
-      svm.load("hogtrain");
-
-      int zeros=0, ones=0;
-      vector<string> dirs = listdir("/media/FC1A11C21A117B3A/inz/priv/sanity_test/test/neg");
-      for(string& s : dirs) {
-      Acc acc;
-      acc.m = imread(s);
-      Acc resultAcc = HOG::iterate(HOG::features(), acc);
-      int predict = svm.predict(resultAcc.m.t());
-      cout << s << " " << predict << endl;
-
-      if(predict == 0) {
-      zeros++;
-      }
-      else {
-      ones++;
-      }
-      }
-
-      cout << "Zeros: " << zeros << endl;
-      cout << "Ones: " << ones << endl;
-      cout << "Total: " << ones+zeros << endl;*/
-
   return 0;
 }
 

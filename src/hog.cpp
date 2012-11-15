@@ -179,13 +179,6 @@ auto HOG::flatten_features(Acc a) -> Acc {
     return a;
 }
 
-auto HOG::iterate(vector<function<Acc(Acc)>> through, Acc acc) -> Acc {
-  for(function<Acc(Acc)>& fun : through) {
-      acc = fun(acc);
-  }
-  return acc;
-}
-
 vector<function<Acc(Acc)>> HOG::features() {
     vector<function<Acc(Acc)>> funs;
     funs.push_back(convert_to_grayscale); 

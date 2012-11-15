@@ -5,6 +5,7 @@
 #include <iostream>
 #include <new>
 #include <dirent.h>
+#include <unistd.h>
 
 using namespace std;
 using namespace cv; 
