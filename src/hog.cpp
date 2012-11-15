@@ -1,38 +1,103 @@
 #include "hog.h"
+#include <dirent.h>
 
 int main(int argc, char** argv) {
-  char* imageName = argv[1];
 
-  Mat image;
-  image = imread(imageName, 1);
+  auto listdir = [](const char *path) {
+    DIR *pdir = NULL;
+    pdir = opendir(path);
+    struct dirent *pent = NULL;
 
-  imshow("Image", image);
-  Acc acc;
-  acc.m = image;
-  for(function<Acc&(Acc&)>& fun : HOG::steps()) {
-      acc = fun(acc);
+    vector<string> files;
+    while(pent = readdir(pdir)) {
+      string file(pent->d_name);
+      if(file!="." && file!="..") {
+        file = "/"+file;
+        files.push_back(path + file);
+      }
+    }
+    closedir(pdir);
+    return files;
+  };
+
+/*  Mat features(0, 0, CV_32FC1);
+  Mat labels(0, 0, CV_32FC1);
+  auto addFeature = [&](Mat sample) {
+    Size s = features.size();
+    if(s.width == 0 && s.height == 0) {
+      features = sample;
+    }
+    else {
+      features.push_back(sample);
+    }
+  };
+
+  vector<string> dirs = listdir("/media/FC1A11C21A117B3A/inz/priv/sanity_test/train/pos");
+  for(string& s : dirs) {
+    Acc acc;
+    acc.m = imread(s);
+    Acc resultAcc = HOG::iterate(HOG::features(), acc);
+    addFeature(resultAcc.m);
+    cout << s << endl;
   }
-  tuple<Mat, Mat> t = acc.t2;
-  imshow("Gradient x", get<0>(t));
-  imshow("Gradient y", get<1>(t));
+  Mat labelsPos(dirs.size(), 1, CV_32FC1, Scalar::all(1));
+  labels.push_back(labelsPos);
 
-  imshow("HOG", acc.m);
-  waitKey(0);
+  dirs = listdir("/media/FC1A11C21A117B3A/inz/priv/sanity_test/train/neg");
+  for(string& s : dirs) {
+    Acc acc;
+    acc.m = imread(s);
+    Acc resultAcc = HOG::iterate(HOG::features(), acc);
+    addFeature(resultAcc.m);
+    cout << s << endl;
+  }
+  Mat labelsNeg(dirs.size(), 1, CV_32FC1, Scalar::all(0));
+  labels.push_back(labelsNeg);
+  
+  CvSVM svm;
+  CvSVMParams params;
+  params.kernel_type = CvSVM::LINEAR;
+  svm.train(features, labels, Mat(), Mat(), params);
+  svm.save("hogtrain");*/
+  
+  CvSVM svm;
+  svm.load("hogtrain");
+
+  int zeros=0, ones=0;
+  vector<string> dirs = listdir("/media/FC1A11C21A117B3A/inz/priv/sanity_test/test/neg");
+  for(string& s : dirs) {
+    Acc acc;
+    acc.m = imread(s);
+    Acc resultAcc = HOG::iterate(HOG::features(), acc);
+    int predict = svm.predict(resultAcc.m.t());
+    cout << s << " " << predict << endl;
+
+    if(predict == 0) {
+      zeros++;
+    }
+    else {
+      ones++;
+    }
+  }
+
+  cout << "Zeros: " << zeros << endl;
+  cout << "Ones: " << ones << endl;
+  cout << "Total: " << ones+zeros << endl;
+
   return 0;
 }
 
 
-auto HOG::convert_to_grayscale(Acc& a) -> Acc& {
+auto HOG::convert_to_grayscale(Acc a) -> Acc {
     Mat gray_image;
     cvtColor(a.m, gray_image, CV_RGB2GRAY);
     a.m = gray_image;
     return a;
 };
 
-auto HOG::calculate_gradient(Acc& a) -> Acc& {
-    Mat grad = (Mat_<char>(1,3) << -1, 0, 1);
-    Size s = a.m.size();
-    Mat input(s.height, s.width, CV_16SC1);
+auto HOG::calculate_gradient(Acc a) -> Acc {
+    Mat grad = (Mat_<char>(3,1) << 1, 0, -1);
+    Mat input(grad.rows, grad.cols, CV_16SC1);
     a.m.convertTo(input, CV_16SC1);
     Mat gradient_x;
     Mat gradient_y;
@@ -43,102 +108,175 @@ auto HOG::calculate_gradient(Acc& a) -> Acc& {
     return a;
 };
 
-auto HOG::calculate_magnitude_orientation(Acc& a) -> Acc& {
+auto HOG::calculate_magnitude_orientation(Acc a) -> Acc {
     Mat x = get<0>(a.t2);
     Mat y = get<1>(a.t2);
-    Size s = x.size();
-    Mat magnitude(s.height, s.width, CV_8UC1);
-    Mat orientation(s.height, s.width, CV_8UC1);
-    for(int i=0; i<s.height; i++) {
-        for(int j=0; j<s.width; j++) {
-          Point p(j,i);
-          double vx = x.at<short int>(p);
-          double vy = y.at<short int>(p);
-          magnitude.at<uchar>(p) = (uchar)sqrt(vx*vx + vy*vy);
-          int orient = (int)(atan2(vx, vy)*180/CV_PI);
-          orient = (orient < 0 ? 360+orient : orient);
-          orient = (orient > 180 ? orient-180 : orient);
-          orientation.at<uchar>(p) = (uchar)orient;
+    Mat magnitude(x.rows, x.cols, CV_32FC1);
+    Mat orientation(x.rows, x.cols, CV_32FC1);
+    for(int i=0; i<x.rows; i++) {
+        for(int j=0; j<x.cols; j++) {
+          float vx = (float)x.at<short int>(i,j);
+          float vy = (float)y.at<short int>(i,j);
+          magnitude.at<float>(i,j) = sqrt(vx*vx + vy*vy);
+          float orient = atan2(vy,vx);
+          if(orient < 0) {
+            orient += CV_PI;
+          }
+          orientation.at<float>(i,j) = orient;
         }
     }
     a.t2 = tuple<Mat, Mat>(magnitude, orientation);
     return a;
 }
 
-auto HOG::perform_binning(Acc& a) -> Acc& {
-    int cellWidth = 3;
-    int bins = 10;
-    float binSize = 180/(bins+0.0);
-    Mat magnitude = get<0>(a.t2);
-    Mat orientation = get<1>(a.t2);
-    Size s = magnitude.size();
-    Mat cells((s.width/cellWidth)*(s.height/cellWidth), bins, CV_64FC1, Scalar::all(0));
-    for(int i=0; i<s.height; i++) {
-      for(int j=0; j<s.width; j++) {
-        // cell numbers on x and y axes, start from 1, left top corner
-        int cellX = ceil((j-0.5*cellWidth)/cellWidth);
-        int cellY = ceil((i-0.5*cellWidth)/cellWidth);
-        // coordinates inside cells, start from 1
-        int xCell = (j+1)-(cellX-1)*cellWidth;
-        int yCell = (i+1)-(cellY-1)*cellWidth;
-        // coordinates of neighbouring cells centers, start from 1
-        // (x0, y0) - top left corner cell center
-        // (x1, y1) - bottom right corner cell center
-        int x0 = round((cellX - 0.5)*cellWidth);
-        int x1 = x0+cellWidth;
-        int y0 = round((cellY - 0.5)*cellWidth);
-        int y1 = y0+cellWidth;
-        
-        if(x0 > 0 && y0 > 0 && y1 <= s.height && x1 <= s.width) {
-          tuple<int, int> xes[] = {tuple<int, int>(x0, x1), tuple<int, int>(x1, x0)};
-          tuple<int, int> yes[] = {tuple<int, int>(y0, y1), tuple<int, int>(y1, y0)};
-          for(tuple<int, int> &x : xes) {
-            for(tuple<int, int> &y : yes) {
-              int x_0 = get<0>(x);
-              int x_1 = get<1>(x);
-              int y_0 = get<0>(y);
-              int y_1 = get<1>(y);
-              int row = (y_0/cellWidth) * (s.width/cellWidth) + (x_0/cellWidth);
-              int col = orientation.at<uchar>(i,j) / binSize;
-              double xc = (j+1-x_0)/(x_1-x_0+0.0);
-              double yc = (i+1-y_0)/(y_1-y_0+0.0);
-              double interpolation = xc * yc * magnitude.at<uchar>(i,j);
-              cells.at<double>(row, col) += interpolation;
-            }
-          }
+auto HOG::perform_binning(Acc a) -> Acc {
+    int cellWidth = 8;
+    int binsNo = 9;
+
+    Mat mag = get<0>(a.t2);
+    Mat orient = get<1>(a.t2);
+    int xCells = mag.cols / cellWidth;
+    int yCells = mag.rows / cellWidth;
+
+    Mat angleLut = Mat::zeros(binsNo, 1, CV_32FC1);
+    Mat xLut = Mat::zeros(xCells, 1, CV_32FC1);
+    Mat yLut = Mat::zeros(yCells, 1, CV_32FC1);
+    Mat bins = Mat::zeros(xCells*yCells, binsNo, CV_32FC1);
+
+    for(int i=0; i<binsNo; i++) {
+      angleLut.at<float>(i, 0) = (CV_PI/binsNo) * (i+0.5);
+    }
+    for(int i=0; i<xCells; i++) {
+      xLut.at<float>(i, 0) = (float)mag.cols/xCells * (i+0.5);
+    }
+    for(int i=0; i<yCells; i++) {
+      yLut.at<float>(i, 0) = (float)mag.rows/yCells * (i+0.5);
+    }
+
+    for(int i=0; i<mag.rows; i++) {
+      for(int j=0; j<mag.cols; j++) {
+        float angle = orient.at<float>(i,j);
+        int bin = round(angle/CV_PI * binsNo);
+
+        int angleBin2, angleBin1;
+        float ca1, ca2;
+        if(bin == 0) {
+          angleBin2 = 0;
+          angleBin1 = 0;
+          ca1 = 0;
+          ca2 = 1;
         }
+        else if(bin == binsNo) {
+          angleBin2 = binsNo-1;
+          angleBin1 = binsNo-1;
+          ca1 = 0;
+          ca2 = 1;
+        }
+        else {
+          angleBin2 = bin;
+          angleBin1 = bin-1;
+          float angle2 = angleLut.at<float>(angleBin2, 0);
+          float angle1 = angleLut.at<float>(angleBin1, 0);
+          ca1 = (angle-angle1)/(angle2-angle1);
+          ca2 = (angle2-angle)/(angle2-angle1);
+        }
+
+        int x = j;
+        int xBin = round(((float)x/mag.cols) * xCells); 
+        int xBin2, xBin1;
+        float cax1, cax2;
+        if(xBin == 0) {
+          xBin2 = 0;
+          xBin1 = 0;
+          cax1 = 0;
+          cax2 = 1;
+        }
+        else if(xBin == xCells) {
+          xBin2 = xCells-1;
+          xBin1 = xCells-1;
+          cax1 = 0;
+          cax2 = 1;
+        }
+        else {
+          xBin2 = xBin;
+          xBin1 = xBin-1;
+          float x2 = xLut.at<float>(xBin2, 0);
+          float x1 = xLut.at<float>(xBin1, 0);
+          cax1 = (x-x1)/(x2-x1);
+          cax2 = (x2-x)/(x2-x1);
+        }
+
+        int y = i;
+        int yBin = round(((float)y/mag.rows) * yCells); 
+        int yBin1, yBin2;
+        float cay1, cay2;
+        if(yBin == 0) {
+          yBin1 = 0;
+          yBin2 = 0;
+          cay1 = 0;
+          cay2 = 1;
+        }
+        else if(yBin == yCells) {
+          yBin1 = yCells-1;
+          yBin2 = yCells-1;
+          cay1 = 0;
+          cay2 = 1;
+        }
+        else {
+          yBin2 = yBin;
+          yBin1 = yBin-1;
+          float y2 = yLut.at<float>(yBin2, 0);
+          float y1 = yLut.at<float>(yBin1, 0);
+          cay1 = (y-y1)/(y2-y1);
+          cay2 = (y2-y)/(y2-y1);
+        }
+
+        int h1 = yBin1 * xCells + xBin1;
+        int h2 = yBin1 * xCells + xBin2;
+        int h3 = yBin2 * xCells + xBin1;
+        int h4 = yBin2 * xCells + xBin2;
+        float m = mag.at<float>(i,j);
+
+        bins.at<float>(h1, angleBin1) += cax1*cay1*ca1*m;
+        bins.at<float>(h1, angleBin2) += cax1*cay1*ca2*m;
+        bins.at<float>(h2, angleBin1) += cax2*cay1*ca1*m;
+        bins.at<float>(h2, angleBin2) += cax2*cay1*ca2*m;
+        bins.at<float>(h3, angleBin1) += cax1*cay2*ca1*m;
+        bins.at<float>(h3, angleBin2) += cax1*cay2*ca2*m;
+        bins.at<float>(h4, angleBin1) += cax2*cay2*ca1*m;
+        bins.at<float>(h4, angleBin2) += cax2*cay2*ca2*m;
       }
     }
-    a.m = cells;
+    a.m = bins;
     return a;
 }
 
-auto HOG::normalize_blocks(Acc& a) -> Acc& {
+auto HOG::normalize_blocks(Acc a) -> Acc {
     int blockWidth = 3;
-    Mat histograms = a.m;
-    Size s = histograms.size();
-    int height = s.height/blockWidth;
-    Mat blocks(0, s.width*blockWidth, CV_64FC1, Scalar::all(0));
-    for(int i=0; i<height; i++) {
-      Mat block = histograms.rowRange(0, blockWidth);
-      Mat blockV = block.reshape(0,1);
-      Mat normalized = blockV/(norm(blockV, NORM_L1)+0.0001);
-      blocks.push_back(normalized);
-      s = histograms.size();
-      if(s.height >= 2*blockWidth) {
-        histograms = histograms.rowRange(blockWidth, s.height);
-      }
-    }
-    a.m = blocks;
+    Mat bins = a.m;
+//    bins /= (norm(bins, NORM_L1) + 0.0001);
     return a;
 }
 
-vector<function<Acc&(Acc&)>> HOG::steps() {
-    vector<function<Acc&(Acc&)>> funs;
+auto HOG::flatten_features(Acc a) -> Acc {
+    a.m = a.m.reshape(0, 1);
+    return a;
+}
+
+auto HOG::iterate(vector<function<Acc(Acc)>> through, Acc acc) -> Acc {
+  for(function<Acc(Acc)>& fun : through) {
+      acc = fun(acc);
+  }
+  return acc;
+}
+
+vector<function<Acc(Acc)>> HOG::features() {
+    vector<function<Acc(Acc)>> funs;
     funs.push_back(convert_to_grayscale); 
     funs.push_back(calculate_gradient);
     funs.push_back(calculate_magnitude_orientation);
     funs.push_back(perform_binning);
     funs.push_back(normalize_blocks);
+    funs.push_back(flatten_features);
     return funs; 
 };
