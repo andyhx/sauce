@@ -33,7 +33,7 @@ void Controller::generate(char* input, char* output, int width, int height, int 
       Mat finalWindowH = image.rowRange(y, y+height);
       Mat finalWindow = finalWindowH.colRange(x, x+width);
       char buf[1024];
-      sprintf(buf, "%s/%4d.png", output, n++);
+      sprintf(buf, "%s/%d.png", output, n++);
       imwrite(buf, finalWindow);
     }
 }

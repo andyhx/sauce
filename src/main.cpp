@@ -1,5 +1,6 @@
 #include "global.h"
 #include "hog.h"
+#include "cov.h"
 #include "controller.h"
 #include "descriptor.h"
 
@@ -46,7 +47,7 @@ int main(int argc, char** argv) {
           break;
       }
     }
-    HOG *hog = new HOG();
+    Cov *hog = new Cov();
     Controller::extract(hog, dir , buf);
   }
   else if(strcmp("train", argv[1]) == 0) {
@@ -80,7 +81,7 @@ int main(int argc, char** argv) {
           break;
       }
     }
-    HOG* hog = new HOG();
+    Cov* hog = new Cov();
     Controller::predict(hog, set, svm);
   }
   else {
