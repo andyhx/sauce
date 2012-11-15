@@ -1,4 +1,6 @@
-#include "acc.h"
+#ifndef HOG_H
+#define HOG_H
+#include "global.h"
 
 class HOG {
   static auto convert_to_grayscale(Acc a) -> Acc;
@@ -12,3 +14,4 @@ class HOG {
   static auto iterate(vector<function<Acc(Acc)>> through, Acc a) -> Acc;
   static vector<function<Acc(Acc)>> features();
 };
+#endif
