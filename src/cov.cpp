@@ -61,11 +61,10 @@ auto Cov::calculate_covariances(Acc a) -> Acc {
 
 auto Cov::normalize_blocks(Acc a) -> Acc {
     Mat bins = a.m;
-    //for(int i=0; i<bins.rows; i++) {
-      //Mat row = bins.rowRange(i, i+1);
-      //row = row / (norm(row, NORM_L2) + 0.001);
-    //}
-    bins /= (norm(bins, NORM_L2) + 0.0001);
+    for(int i=0; i<bins.rows; i++) {
+      Mat row = bins.rowRange(i, i+1);
+      row = row / (norm(row, NORM_L2) + 0.001);
+    }
     return a;
 }
 

@@ -11,7 +11,12 @@ int main(int argc, char** argv) {
     Controller::show_usage();
     return 0;
   }
-  if(strcmp("generate", argv[1]) == 0) {
+  if(strcmp("detect", argv[1]) == 0) {
+    char* input = argv[2];
+    char* annotations = argv[3];
+    Controller::detect(input, annotations);
+  }
+  else if(strcmp("generate", argv[1]) == 0) {
     char* dir = argv[2];
     char output[1024],width[1024],height[1024],hstride[1024],vstride[1024];
     int c;

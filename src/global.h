@@ -3,6 +3,7 @@
 #include <opencv2/opencv.hpp>
 #include <functional>
 #include <iostream>
+#include <fstream>
 #include <new>
 #include <dirent.h>
 #include <unistd.h>

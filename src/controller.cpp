@@ -95,7 +95,57 @@ void Controller::predict(Descriptor* desc, char* set, char* model) {
   cout << "Zeros: " << zeros << " (" << (float)(zeros)/total << ")" << endl;
   cout << "Ones: " << ones << " (" <<  (float)ones/total << ")" << endl;
   cout << "Total: " << total << endl;
-}
+};
+
+void Controller::detect(char* input, char* annotations) {
+  vector<BOX> boxes = pascal(annotations);
+  Mat image = imread(input);
+  for(BOX& b : boxes) {
+    rectangle(image, Rect(get<0>(b), get<1>(b), get<2>(b)-get<0>(b), get<3>(b)-get<1>(b)),
+              Scalar(0, 0, 255), 2);
+  }
+  imshow("im", image);
+  waitKey();
+};
+
+auto Controller::pascal(char* input) -> vector<BOX> {
+  ifstream file;
+  file.open(input);
+
+  vector<string> goodLines;
+  string line;
+  if(file.is_open()) {
+    int n = 0;
+    while(file.good()) {
+      getline(file, line);
+      if(line!="" && line[0]!='#' && n++ > 3) {
+        goodLines.push_back(line);
+      }
+    }
+  }
+
+  vector<BOX> boxes;
+  for(int i=0; i < goodLines.size(); i+=3) {
+    string box = goodLines[i+2];
+    size_t found = box.find_first_of(":", 0);
+    string coords = box.substr(found+2);
+    
+    size_t firstComma = coords.find_first_of(",", 0);
+    size_t secondComma = coords.find_first_of(",", firstComma+1);
+    size_t firstRight = coords.find_first_of(")", 0);
+    size_t secondRight = coords.find_first_of(")", firstRight+1);
+    size_t secondLeft = coords.find_first_of("(", 1);
+
+    string xmin = coords.substr(1, firstComma-1);
+    string ymin = coords.substr(firstComma+2, firstRight-firstComma-2);
+    string xmax = coords.substr(secondLeft+1, secondComma-secondLeft-1);
+    string ymax = coords.substr(secondComma+2, secondRight-secondComma-2); 
+    
+    boxes.push_back(BOX(atoi(xmin.c_str()), atoi(ymin.c_str()), atoi(xmax.c_str()), atoi(ymax.c_str())));
+  }
+
+  return boxes;
+};
 
 auto Controller::addFeature(Mat& features, Mat s) -> void {
   if(s.rows == 0 && s.cols == 0) {

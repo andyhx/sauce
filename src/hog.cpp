@@ -166,11 +166,10 @@ auto HOG::perform_binning(Acc a) -> Acc {
 auto HOG::normalize_blocks(Acc a) -> Acc {
     int blockWidth = 3;
     Mat bins = a.m;
-    //for(int i=0; i<bins.rows; i++) {
-      //Mat row = bins.rowRange(i, i+1);
-      //row = row / (norm(row, NORM_L2) + 0.001);
-    //}
-    bins /= (norm(bins, NORM_L2) + 0.0001);
+    for(int i=0; i<bins.rows; i++) {
+      Mat row = bins.rowRange(i, i+1);
+      row = row / (norm(row, NORM_L2) + 0.001);
+    }
     return a;
 }
 
