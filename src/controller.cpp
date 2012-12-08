@@ -19,8 +19,7 @@ void Controller::generate(char* input, char* output, int width, int height, int 
       int x=0, y=0;
       for(int i=0; i<g.rows-height; i+=v_stride) {
         for(int j=0; j<g.cols-width; j+=h_stride) {
-          Mat windowH = g.rowRange(i, i+height);
-          Mat window = windowH.colRange(j, j+width);
+          Mat window = g.rowRange(i, i+height).colRange(j, j+width);
           Scalar windowSum = sum(window);
           if(windowSum(0) > best) {
             best = windowSum(0);
@@ -30,8 +29,7 @@ void Controller::generate(char* input, char* output, int width, int height, int 
         }
       }
 
-      Mat finalWindowH = image.rowRange(y, y+height);
-      Mat finalWindow = finalWindowH.colRange(x, x+width);
+      Mat finalWindow = image.rowRange(y, y+height).colRange(x, x+width);
       char buf[1024];
       sprintf(buf, "%s/%d.png", output, n++);
       imwrite(buf, finalWindow);
@@ -42,10 +40,8 @@ void Controller::extract(Descriptor* desc, char* dir, char* output) {
     Mat features(0, 0, CV_32FC1);
     vector<string> dirs = Controller::listdir(dir);
     for(string& s : dirs) {
-      Acc acc;
-      acc.m = imread(s);
-      Acc resultAcc = desc->iterate(acc);
-      Controller::addFeature(features, resultAcc.m);
+      Mat image = imread(s);
+      Controller::add_feature(features, extract_features(desc, image));
     }
     FileStorage fs(output, FileStorage::WRITE);
     fs << "features" << features;
@@ -80,10 +76,8 @@ void Controller::predict(Descriptor* desc, char* set, char* model) {
   int zeros=0, ones=0;
   vector<string> dirs = listdir(set);
   for(string& s : dirs) {
-    Acc acc;
-    acc.m = imread(s);
-    Acc resultAcc = desc->iterate(acc);
-    int predict = svm.predict(resultAcc.m.t());
+    Mat result = extract_features(desc, imread(s));
+    int predict = svm.predict(result);
     if(predict == 0) {
       zeros++;
     }
@@ -97,18 +91,63 @@ void Controller::predict(Descriptor* desc, char* set, char* model) {
   cout << "Total: " << total << endl;
 };
 
-void Controller::detect(char* input, char* annotations) {
-  vector<BOX> boxes = pascal(annotations);
-  Mat image = imread(input);
-  for(BOX& b : boxes) {
-    rectangle(image, Rect(get<0>(b), get<1>(b), get<2>(b)-get<0>(b), get<3>(b)-get<1>(b)),
-              Scalar(0, 0, 255), 2);
+void Controller::detect(Descriptor* desc, char* model, char* input, char* annotations) {
+  CvSVM svm;
+  svm.load(model);
+
+  int width = 64;
+  int height = 128;
+  int h_stride = 32;
+  int v_stride = 64;
+
+  vector<string> images = listdir(input);
+  vector<string> annots = listdir(annotations);
+
+  for(int ii=0; ii<images.size(); ii++) {
+    Mat image = imread(images[ii]);
+    Mat original;
+    float scale = 450./image.rows;
+    resize(image, image, Size(0,0), scale, scale);
+    image.copyTo(original);
+
+    vector<BOX> boxes = pascal(annots[ii], scale);
+    for(BOX& b : boxes) {
+      rectangle(image, Rect(get<0>(b), get<1>(b), get<2>(b)-get<0>(b), get<3>(b)-get<1>(b)),
+          Scalar(0, 0, 255), 2);
+    }
+
+    float scales[] = {0.3, 0.5, 0.6, 0.75, 1, 1.15};
+
+    for(float &s : scales) {
+      vector<BOX> detections;
+      Mat scaled;
+      resize(original, scaled, Size(0,0), s, s);
+      for(int i=0; i<scaled.rows-height; i+=v_stride) {
+        for(int j=0; j<scaled.cols-width; j+=h_stride) {
+          Mat window = scaled.rowRange(i, i+height).colRange(j, j+width);
+          Mat sample = extract_features(desc, window);
+          int predict = svm.predict(sample);
+          if(predict == 1) {
+            detections.push_back(BOX(j/scale, i/scale, width/scale, height/scale));
+          }
+        }
+      }
+
+      Mat newImage;
+      image.copyTo(newImage);
+      for(BOX& b : detections) {
+        rectangle(newImage, Rect(get<0>(b), get<1>(b), get<2>(b), get<3>(b)),
+            Scalar(0, 255, 0), 2);
+      }
+
+      char buf[1024];
+      sprintf(buf, "/media/FC1A11C21A117B3A/inz/priv/det_cov3/%d_%f.png", ii, s);
+      imwrite(buf, newImage);
+    }
   }
-  imshow("im", image);
-  waitKey();
 };
 
-auto Controller::pascal(char* input) -> vector<BOX> {
+auto Controller::pascal(string input, float scale) -> vector<BOX> {
   ifstream file;
   file.open(input);
 
@@ -141,13 +180,26 @@ auto Controller::pascal(char* input) -> vector<BOX> {
     string xmax = coords.substr(secondLeft+1, secondComma-secondLeft-1);
     string ymax = coords.substr(secondComma+2, secondRight-secondComma-2); 
     
-    boxes.push_back(BOX(atoi(xmin.c_str()), atoi(ymin.c_str()), atoi(xmax.c_str()), atoi(ymax.c_str())));
+    boxes.push_back(BOX(atoi(xmin.c_str())*scale, atoi(ymin.c_str())*scale, atoi(xmax.c_str())*scale, atoi(ymax.c_str())*scale));
   }
 
   return boxes;
 };
 
-auto Controller::addFeature(Mat& features, Mat s) -> void {
+auto Controller::extract_features(Descriptor* desc, Mat image) -> Mat {
+  if(image.rows == 160 && image.cols == 96) {
+    image = image.rowRange(16,128+16).colRange(16,64+16);
+  }
+  else if(image.rows == 134 && image.cols == 70) {
+    image = image.rowRange(3,128+3).colRange(3,64+3);
+  }
+  Acc acc;
+  acc.m = image;
+  Acc resultAcc = desc->iterate(acc);
+  return resultAcc.m;
+};
+
+auto Controller::add_feature(Mat& features, Mat s) -> void {
   if(s.rows == 0 && s.cols == 0) {
     features = s;
   }

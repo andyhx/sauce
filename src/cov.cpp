@@ -63,7 +63,7 @@ auto Cov::normalize_blocks(Acc a) -> Acc {
     Mat bins = a.m;
     for(int i=0; i<bins.rows; i++) {
       Mat row = bins.rowRange(i, i+1);
-      row = row / (norm(row, NORM_L2) + 0.001);
+      row /= (norm(row, NORM_L2) + 0.001);
     }
     return a;
 }

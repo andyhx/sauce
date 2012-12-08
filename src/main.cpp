@@ -6,15 +6,43 @@
 
 int main(int argc, char** argv) {
 
+  auto pick_descriptor = [](char* method) -> Descriptor* {
+    Descriptor* desc;
+    if(strcmp("hog", method) == 0) {
+      desc = new HOG();
+    }
+    else {
+      desc = new Cov();
+    }
+    return desc;
+  };
 
   if(argc <= 1) {
     Controller::show_usage();
     return 0;
   }
   if(strcmp("detect", argv[1]) == 0) {
-    char* input = argv[2];
-    char* annotations = argv[3];
-    Controller::detect(input, annotations);
+    char input[1024], annotations[1024], method[1024], classifier[1024];
+    int c;
+    while ( (c = getopt(argc, argv, "i:a:m:c:")) != -1) {
+      switch(c) {
+        case 'i':
+          strcpy(input, optarg);
+          break;
+        case 'a':
+          strcpy(annotations, optarg);
+          break;
+        case 'm':
+          strcpy(method, optarg);
+          break;
+        case 'c':
+          strcpy(classifier, optarg);
+          break;
+      }
+    }
+
+    Descriptor* desc = pick_descriptor(method); 
+    Controller::detect(desc, classifier, input, annotations);
   }
   else if(strcmp("generate", argv[1]) == 0) {
     char* dir = argv[2];
@@ -43,17 +71,21 @@ int main(int argc, char** argv) {
   }
   else if(strcmp("extract", argv[1]) == 0) {
     char* dir = argv[2];
-    char buf[1024];
+    char buf[1024], method[1024];
     int c;
-    while ( (c = getopt(argc, argv, "o:")) != -1) {
+    while ( (c = getopt(argc, argv, "o:m:")) != -1) {
       switch(c) {
         case 'o':
           strcpy(buf, optarg);
           break;
+        case 'm':
+          strcpy(method, optarg);
+          break;
       }
     }
-    Cov *hog = new Cov();
-    Controller::extract(hog, dir , buf);
+
+    Descriptor *desc = pick_descriptor(method);
+    Controller::extract(desc, dir , buf);
   }
   else if(strcmp("train", argv[1]) == 0) {
     char pos[1024], neg[1024], output[1024];
@@ -74,9 +106,9 @@ int main(int argc, char** argv) {
     Controller::train(pos, neg, output);
   }
   else if(strcmp("test", argv[1]) == 0) {
-    char svm[1024],set[1024];
+    char svm[1024],set[1024], method[1024];
     int c;
-    while ( (c = getopt(argc, argv, "s:c:")) != -1) {
+    while ( (c = getopt(argc, argv, "s:c:m:")) != -1) {
       switch(c) {
         case 's':
           strcpy(set, optarg);
@@ -84,10 +116,14 @@ int main(int argc, char** argv) {
         case 'c':
           strcpy(svm, optarg);
           break;
+        case 'm':
+          strcpy(method, optarg);
+          break;
       }
     }
-    Cov* hog = new Cov();
-    Controller::predict(hog, set, svm);
+
+    Descriptor* desc = pick_descriptor(method);
+    Controller::predict(desc, set, svm);
   }
   else {
     Controller::show_usage();
