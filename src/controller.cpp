@@ -128,7 +128,7 @@ void Controller::detect(Descriptor* desc, char* model, char* input, char* annota
           Mat sample = extract_features(desc, window);
           int predict = svm.predict(sample);
           if(predict == 1) {
-            detections.push_back(BOX(j/scale, i/scale, (j+width)/scale, (i+height)/scale));
+            detections.push_back(BOX(j/s, i/s, (j+width)/s, (i+height)/s));
           }
         }
       }
@@ -143,6 +143,46 @@ void Controller::detect(Descriptor* desc, char* model, char* input, char* annota
       char buf[1024];
       sprintf(buf, "/media/FC1A11C21A117B3A/inz/priv/det_cov3/%d_%f.png", ii, s);
       imwrite(buf, newImage);
+    }
+  }
+};
+
+void Controller::false_positives(Descriptor* desc, char* model, char* input, char* output) {
+  CvSVM svm;
+  svm.load(model);
+
+  int width = 64;
+  int height = 128;
+  int h_stride = 64;
+  int v_stride = 128;
+
+  vector<string> images = listdir(input);
+  int n = 0;
+
+  for(string& s : images) {
+    Mat image = imread(s);
+    float scale = 450./image.rows;
+    resize(image, image, Size(0,0), scale, scale);
+
+    float scales[] = {1};
+    for(float &s : scales) {
+      vector<BOX> detections;
+      Mat scaled;
+      resize(image, scaled, Size(0,0), s, s);
+
+      for(int i=0; i<scaled.rows-height; i+=v_stride) {
+        for(int j=0; j<scaled.cols-width; j+=h_stride) {
+          Mat window = scaled.rowRange(i, i+height).colRange(j, j+width);
+          Mat sample = extract_features(desc, window);
+          int predict = svm.predict(sample);
+          if(predict == 1) {
+            BOX detection(j/s, i/s, (j+width)/s, (i+height)/s);
+            char buf[1024];
+            sprintf(buf, "%s/fp_%04d.png", output, n++);
+            imwrite(buf, window);
+          }
+        }
+      }
     }
   }
 };
@@ -211,18 +251,18 @@ auto Controller::add_feature(Mat& features, Mat s) -> void {
 auto Controller::is_false_positive(BOX detection, vector<BOX>& boxes) -> bool {
   for(BOX& b : boxes) {
     //check if detected window and bounding box overlap
-    if(MAX(get<0>(b), get<0>(detection)) < MIN(get<2>(b), get<2>(detection)) &&
-       MAX(get<1>(b), get<1>(detection)) < MIN(get<3>(b), get<3>(detection)))
+    if(MAX(ELEMENT(0,b), ELEMENT(0,detection)) < MIN(ELEMENT(2,b), ELEMENT(2,detection)) &&
+       MAX(ELEMENT(1,b), ELEMENT(1,detection)) < MIN(ELEMENT(3,b), ELEMENT(3,detection)))
     {
       //check if they overlap on at least 50% of smaller one's area
-      int x1 = MAX(get<0>(b), get<0>(detection));
-      int x2 = MIN(get<2>(b), get<2>(detection));
-      int y1 = MAX(get<1>(b), get<1>(detection));
-      int y2 = MIN(get<3>(b), get<3>(detection));
+      int x1 = MAX(ELEMENT(0,b), ELEMENT(0,detection));
+      int x2 = MIN(ELEMENT(2,b), ELEMENT(2,detection));
+      int y1 = MAX(ELEMENT(1,b), ELEMENT(1,detection));
+      int y2 = MIN(ELEMENT(3,b), ELEMENT(3,detection));
       int width = x2-x1;
       int height = y2-y1;
-      int boxArea = (get<2>(b) - get<0>(b)) * (get<3>(b) - get<1>(b));
-      int detectionArea = (get<2>(detection) - get<0>(detection)) * (get<3>(detection) - get<1>(detection));
+      int boxArea = (ELEMENT(2,b) - ELEMENT(0,b)) * (ELEMENT(3,b) - ELEMENT(1,b));
+      int detectionArea = (ELEMENT(2,detection) - ELEMENT(0,detection)) * (ELEMENT(3,detection)-ELEMENT(1,detection));
 
       if(2*width*height >= (boxArea > detectionArea ? detectionArea : boxArea))
         return false;

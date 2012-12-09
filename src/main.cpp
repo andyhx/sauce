@@ -21,7 +21,30 @@ int main(int argc, char** argv) {
     Controller::show_usage();
     return 0;
   }
-  if(strcmp("detect", argv[1]) == 0) {
+  if(strcmp("fp", argv[1]) == 0) {
+    char input[1024], method[1024], classifier[1024], output[1024];
+    int c;
+    while ( (c = getopt(argc, argv, "i:m:c:o:")) != -1) {
+      switch(c) {
+        case 'i':
+          strcpy(input, optarg);
+          break;
+        case 'm':
+          strcpy(method, optarg);
+          break;
+        case 'c':
+          strcpy(classifier, optarg);
+          break;
+        case 'o':
+          strcpy(output, optarg);
+          break;
+      }
+    }
+
+    Descriptor* desc = pick_descriptor(method); 
+    Controller::false_positives(desc, classifier, input, output);
+  }
+  else if(strcmp("detect", argv[1]) == 0) {
     char input[1024], annotations[1024], method[1024], classifier[1024];
     int c;
     while ( (c = getopt(argc, argv, "i:a:m:c:")) != -1) {

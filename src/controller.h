@@ -3,9 +3,6 @@
 #include "global.h"
 #include "descriptor.h"
 
-typedef tuple<int, int, int, int> BOX;
-#define ELEMENT(N, TUPLE) get<N>(TUPLE)
-
 class Controller {
   static auto add_feature(Mat& features, Mat s) -> void;
   static auto listdir(const char* path) -> vector<string>;
@@ -19,6 +16,7 @@ class Controller {
   static void train(char* pos, char* neg, char* output);
   static void predict(Descriptor* desc, char* set, char* model);
   static void detect(Descriptor* desc, char* model, char* input, char* annotations);
+  static void false_positives(Descriptor* desc, char* model, char* input, char* output);
 
   static void generate(char* input, char* output, int width, int height, int h_stride, int v_stride);
 };
