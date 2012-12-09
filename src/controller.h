@@ -4,12 +4,15 @@
 #include "descriptor.h"
 
 typedef tuple<int, int, int, int> BOX;
+#define ELEMENT(N, TUPLE) get<N>(TUPLE)
 
 class Controller {
   static auto add_feature(Mat& features, Mat s) -> void;
   static auto listdir(const char* path) -> vector<string>;
   static auto pascal(string input, float scale) -> vector<BOX>;
   static auto extract_features(Descriptor* desc, Mat image) -> Mat; 
+  static auto is_false_positive(BOX detection, vector<BOX>& boxes) -> bool;
+
   public:
   static void show_usage();
   static void extract(Descriptor* desc, char* dir, char* output);

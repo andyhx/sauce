@@ -15,4 +15,5 @@ struct Acc {
   Mat m;
   tuple<Mat, Mat> t2;
 };
+
 #endif

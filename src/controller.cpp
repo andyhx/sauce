@@ -112,7 +112,7 @@ void Controller::detect(Descriptor* desc, char* model, char* input, char* annota
 
     vector<BOX> boxes = pascal(annots[ii], scale);
     for(BOX& b : boxes) {
-      rectangle(image, Rect(get<0>(b), get<1>(b), get<2>(b)-get<0>(b), get<3>(b)-get<1>(b)),
+      rectangle(image, Rect(ELEMENT(0,b), ELEMENT(1,b), ELEMENT(2,b)-ELEMENT(0,b), ELEMENT(3,b)-ELEMENT(1,b)),
           Scalar(0, 0, 255), 2);
     }
 
@@ -128,7 +128,7 @@ void Controller::detect(Descriptor* desc, char* model, char* input, char* annota
           Mat sample = extract_features(desc, window);
           int predict = svm.predict(sample);
           if(predict == 1) {
-            detections.push_back(BOX(j/scale, i/scale, width/scale, height/scale));
+            detections.push_back(BOX(j/scale, i/scale, (j+width)/scale, (i+height)/scale));
           }
         }
       }
@@ -136,8 +136,8 @@ void Controller::detect(Descriptor* desc, char* model, char* input, char* annota
       Mat newImage;
       image.copyTo(newImage);
       for(BOX& b : detections) {
-        rectangle(newImage, Rect(get<0>(b), get<1>(b), get<2>(b), get<3>(b)),
-            Scalar(0, 255, 0), 2);
+        rectangle(newImage, Rect(ELEMENT(0,b), ELEMENT(1,b), ELEMENT(2,b)-ELEMENT(0,b), ELEMENT(3,b)-ELEMENT(1,b)),
+            is_false_positive(b, boxes) ? Scalar(255,0,0) : Scalar(0, 255, 0), 2);
       }
 
       char buf[1024];
@@ -206,6 +206,29 @@ auto Controller::add_feature(Mat& features, Mat s) -> void {
   else {
     features.push_back(s);
   }
+};
+
+auto Controller::is_false_positive(BOX detection, vector<BOX>& boxes) -> bool {
+  for(BOX& b : boxes) {
+    //check if detected window and bounding box overlap
+    if(MAX(get<0>(b), get<0>(detection)) < MIN(get<2>(b), get<2>(detection)) &&
+       MAX(get<1>(b), get<1>(detection)) < MIN(get<3>(b), get<3>(detection)))
+    {
+      //check if they overlap on at least 50% of smaller one's area
+      int x1 = MAX(get<0>(b), get<0>(detection));
+      int x2 = MIN(get<2>(b), get<2>(detection));
+      int y1 = MAX(get<1>(b), get<1>(detection));
+      int y2 = MIN(get<3>(b), get<3>(detection));
+      int width = x2-x1;
+      int height = y2-y1;
+      int boxArea = (get<2>(b) - get<0>(b)) * (get<3>(b) - get<1>(b));
+      int detectionArea = (get<2>(detection) - get<0>(detection)) * (get<3>(detection) - get<1>(detection));
+
+      if(2*width*height >= (boxArea > detectionArea ? detectionArea : boxArea))
+        return false;
+    }  
+  }
+  return true;
 };
 
 auto Controller::listdir(const char* path) -> vector<string>{
