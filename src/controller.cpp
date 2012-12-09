@@ -125,25 +125,42 @@ void Controller::detect(Descriptor* desc, char* model, char* input, char* annota
   int v_stride = 64;
 
   vector<string> images = listdir(input);
-  vector<string> annots = listdir(annotations);
+
+  map<float, tuple<int, int>> falsePositives;
+  map<float, tuple<int, int>> truePositives;
+
+  float scales[] = {0.3, 0.5, 0.6, 0.75, 1, 1.15, 1.25};
+  for(float &s : scales) { 
+    truePositives[s] = tuple<int,int>(0,0);
+    falsePositives[s] = tuple<int, int>(0,0);
+  }
 
   for(int ii=0; ii<images.size(); ii++) {
+    cout << ii << " " << images.size() << endl;
+
     Mat image = imread(images[ii]);
     Mat original;
     float scale = 450./image.rows;
     resize(image, image, Size(0,0), scale, scale);
     image.copyTo(original);
 
-    vector<BOX> boxes = pascal(annots[ii], scale);
+    size_t found = images[ii].find_last_of("/\\");
+    string file = images[ii].substr(found+1);
+    found = file.find_first_of(".");
+    string name = file.substr(0, found);
+
+    char buf[1024];
+    sprintf(buf, "%s/%s.txt", annotations, name.c_str());
+
+    vector<BOX> boxes = pascal(buf, scale);
     for(BOX& b : boxes) {
       rectangle(image, Rect(ELEMENT(0,b), ELEMENT(1,b), ELEMENT(2,b)-ELEMENT(0,b), ELEMENT(3,b)-ELEMENT(1,b)),
           Scalar(0, 0, 255), 2);
     }
 
-    float scales[] = {0.3, 0.5, 0.6, 0.75, 1, 1.15};
-
     for(float &s : scales) {
       vector<BOX> detections;
+
       Mat scaled;
       resize(original, scaled, Size(0,0), s, s);
       for(int i=0; i<scaled.rows-height; i+=v_stride) {
@@ -151,11 +168,28 @@ void Controller::detect(Descriptor* desc, char* model, char* input, char* annota
           Mat window = scaled.rowRange(i, i+height).colRange(j, j+width);
           Mat sample = extract_features(desc, window);
           int predict = svm.predict(sample);
+
+          if(is_false_positive(BOX(j/s, i/s, (j+width)/s, (i+height)/s), boxes)) {
+            tuple<int, int> fp = falsePositives[s];
+            int a = ELEMENT(0, fp), b = ELEMENT(1, fp);
+            a++;
+            if(predict == 1)
+              b++;
+            falsePositives[s] = tuple<int, int>(a,b);
+          }
+
           if(predict == 1) {
             detections.push_back(BOX(j/s, i/s, (j+width)/s, (i+height)/s));
           }
         }
       }
+
+      int trues = count_true_positives(detections, boxes);
+      tuple<int, int> tp = truePositives[s];
+      int a = ELEMENT(0, tp), b = ELEMENT(1, tp);
+      a += boxes.size();
+      b += trues;
+      truePositives[s] = tuple<int, int>(a,b);
 
       Mat newImage;
       image.copyTo(newImage);
@@ -168,6 +202,14 @@ void Controller::detect(Descriptor* desc, char* model, char* input, char* annota
       sprintf(buf, "/media/FC1A11C21A117B3A/inz/priv/det_cov3/%d_%f.png", ii, s);
       imwrite(buf, newImage);
     }
+  }
+  cout << "false positives" << endl;
+  for(pair<const float, tuple<int,int>>& p : falsePositives) {
+    cout << p.first << " " << ELEMENT(0, p.second) << " " << ELEMENT(1, p.second) << endl;
+  }
+  cout << "true positives" << endl;
+  for(pair<const float, tuple<int,int>>& p : truePositives) {
+    cout << p.first << " " << ELEMENT(0, p.second) << " " << ELEMENT(1, p.second) << endl;
   }
 };
 
@@ -293,6 +335,34 @@ auto Controller::is_false_positive(BOX detection, vector<BOX>& boxes) -> bool {
     }  
   }
   return true;
+};
+
+auto Controller::count_true_positives(vector<BOX>& detections, vector<BOX>& boxes) -> int {
+  int dets = 0;
+  for(BOX& b : boxes) {
+    for(BOX& detection : detections) {
+      //check if detected window and bounding box overlap
+      if(MAX(ELEMENT(0,b), ELEMENT(0,detection)) < MIN(ELEMENT(2,b), ELEMENT(2,detection)) &&
+          MAX(ELEMENT(1,b), ELEMENT(1,detection)) < MIN(ELEMENT(3,b), ELEMENT(3,detection)))
+      {
+        //check if they overlap on at least 50% of smaller one's area
+        int x1 = MAX(ELEMENT(0,b), ELEMENT(0,detection));
+        int x2 = MIN(ELEMENT(2,b), ELEMENT(2,detection));
+        int y1 = MAX(ELEMENT(1,b), ELEMENT(1,detection));
+        int y2 = MIN(ELEMENT(3,b), ELEMENT(3,detection));
+        int width = x2-x1;
+        int height = y2-y1;
+        int boxArea = (ELEMENT(2,b) - ELEMENT(0,b)) * (ELEMENT(3,b) - ELEMENT(1,b));
+        int detectionArea = (ELEMENT(2,detection) - ELEMENT(0,detection)) * (ELEMENT(3,detection)-ELEMENT(1,detection));
+
+        if(2*width*height >= (boxArea > detectionArea ? detectionArea : boxArea)) {
+          dets++;
+          break;
+        } 
+      }
+    }
+  }
+  return dets;
 };
 
 auto Controller::listdir(const char* path) -> vector<string>{

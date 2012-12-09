@@ -9,6 +9,7 @@ class Controller {
   static auto pascal(string input, float scale) -> vector<BOX>;
   static auto extract_features(Descriptor* desc, Mat image) -> Mat; 
   static auto is_false_positive(BOX detection, vector<BOX>& boxes) -> bool;
+  static auto count_true_positives(vector<BOX>& detections, vector<BOX>& boxes) -> int;
 
   public:
   static void show_usage();
