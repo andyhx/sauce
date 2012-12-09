@@ -94,9 +94,9 @@ int main(int argc, char** argv) {
   }
   else if(strcmp("extract", argv[1]) == 0) {
     char* dir = argv[2];
-    char buf[1024], method[1024];
+    char buf[1024], method[1024], probability[1024];
     int c;
-    while ( (c = getopt(argc, argv, "o:m:")) != -1) {
+    while ( (c = getopt(argc, argv, "o:m:p:")) != -1) {
       switch(c) {
         case 'o':
           strcpy(buf, optarg);
@@ -104,11 +104,34 @@ int main(int argc, char** argv) {
         case 'm':
           strcpy(method, optarg);
           break;
+        case 'p':
+          strcpy(probability, optarg);
+          break;
       }
     }
 
+    float p = (float)atoi(probability)/100;
     Descriptor *desc = pick_descriptor(method);
-    Controller::extract(desc, dir , buf);
+    Controller::extract(desc, dir , buf, p);
+  }
+  else if(strcmp("join_sets", argv[1]) == 0) {
+    char o[1024], a[1024], b[1024];
+    int c;
+    while ( (c = getopt(argc, argv, "o:a:b:")) != -1) {
+      switch(c) {
+        case 'o':
+          strcpy(o, optarg);
+          break;
+        case 'a':
+          strcpy(a, optarg);
+          break;
+        case 'b':
+          strcpy(b, optarg);
+          break;
+      }
+    }
+
+    Controller::join_sets(a, b, o);
   }
   else if(strcmp("train", argv[1]) == 0) {
     char pos[1024], neg[1024], output[1024];

@@ -12,8 +12,9 @@ class Controller {
 
   public:
   static void show_usage();
-  static void extract(Descriptor* desc, char* dir, char* output);
+  static void extract(Descriptor* desc, char* dir, char* output, float probability = 1.0);
   static void train(char* pos, char* neg, char* output);
+  static void join_sets(char* a, char* b, char* output);
   static void predict(Descriptor* desc, char* set, char* model);
   static void detect(Descriptor* desc, char* model, char* input, char* annotations);
   static void false_positives(Descriptor* desc, char* model, char* input, char* output);

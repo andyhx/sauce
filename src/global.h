@@ -7,6 +7,7 @@
 #include <new>
 #include <dirent.h>
 #include <unistd.h>
+#include <limits.h>
 
 using namespace std;
 using namespace cv; 

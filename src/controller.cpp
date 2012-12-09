@@ -36,15 +36,39 @@ void Controller::generate(char* input, char* output, int width, int height, int 
     }
 }
   
-void Controller::extract(Descriptor* desc, char* dir, char* output) {
+void Controller::extract(Descriptor* desc, char* dir, char* output, float probability) {
     Mat features(0, 0, CV_32FC1);
     vector<string> dirs = Controller::listdir(dir);
+    srand(time(NULL));
     for(string& s : dirs) {
-      Mat image = imread(s);
-      Controller::add_feature(features, extract_features(desc, image));
+      if(probability == 1.0) {
+        Mat image = imread(s);
+        Controller::add_feature(features, extract_features(desc, image));
+      }
+      else {
+        float prob = (float)rand()/INT_MAX;
+        if(prob < probability) {
+          Mat image = imread(s);
+          Controller::add_feature(features, extract_features(desc, image));
+        }
+      }
     }
     FileStorage fs(output, FileStorage::WRITE);
     fs << "features" << features;
+}
+
+void Controller::join_sets(char* a, char* b, char* output) {
+    FileStorage featuresA(a, FileStorage::READ);
+    FileStorage featuresB(b, FileStorage::READ);
+    Mat aM; featuresA["features"] >> aM;
+    Mat bM; featuresB["features"] >> bM;
+
+    for(int i=0; i<bM.rows; i++) {
+      aM.push_back(bM.rowRange(i, i+1));
+    }
+
+    FileStorage fs(output, FileStorage::WRITE);
+    fs << "features" << aM;
 }
 
 void Controller::train(char* pos, char* neg, char* output) {
@@ -67,7 +91,7 @@ void Controller::train(char* pos, char* neg, char* output) {
     params.kernel_type = CvSVM::LINEAR;
     svm.train(features, labels, Mat(), Mat(), params);
     svm.save(output);
-}
+};
 
 void Controller::predict(Descriptor* desc, char* set, char* model) {
   CvSVM svm;
