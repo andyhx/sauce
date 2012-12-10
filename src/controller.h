@@ -10,6 +10,7 @@ class Controller {
   static auto extract_features(Descriptor* desc, Mat image) -> Mat; 
   static auto is_false_positive(BOX detection, vector<BOX>& boxes) -> bool;
   static auto count_true_positives(vector<BOX>& detections, vector<BOX>& boxes) -> int;
+  static auto annotation_file(char* annotations, string file) -> string;
 
   public:
   static void show_usage();
@@ -20,7 +21,7 @@ class Controller {
   static void detect(Descriptor* desc, char* model, char* input, char* annotations);
   static void false_positives(Descriptor* desc, char* model, char* input, char* output);
 
-  static void generate(char* input, char* output, int width, int height, int h_stride, int v_stride);
+  static void generate(char* input, char* output, int width, int height, int h_stride, int v_stride, int nrand);
 };
 
 #endif

@@ -69,9 +69,9 @@ int main(int argc, char** argv) {
   }
   else if(strcmp("generate", argv[1]) == 0) {
     char* dir = argv[2];
-    char output[1024],width[1024],height[1024],hstride[1024],vstride[1024];
+    char output[1024],width[1024],height[1024],hstride[1024],vstride[1024],n[1024];
     int c;
-    while ( (c = getopt(argc, argv, "o:w:h:x:y:")) != -1) {
+    while ( (c = getopt(argc, argv, "o:w:h:x:y:n:")) != -1) {
       switch(c) {
         case 'o':
           strcpy(output, optarg);
@@ -88,9 +88,12 @@ int main(int argc, char** argv) {
         case 'y':
           strcpy(vstride, optarg);
           break;
+        case 'n':
+          strcpy(n, optarg);
+          break;
       }
     }
-    Controller::generate(dir, output, atoi(width), atoi(height), atoi(hstride), atoi(vstride));
+    Controller::generate(dir, output, atoi(width), atoi(height), atoi(hstride), atoi(vstride), atoi(n));
   }
   else if(strcmp("extract", argv[1]) == 0) {
     char* dir = argv[2];

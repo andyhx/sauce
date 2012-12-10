@@ -6,8 +6,10 @@ void Controller::show_usage() {
   cout << "command = extract | train | test" << endl;
 }
 
-void Controller::generate(char* input, char* output, int width, int height, int h_stride, int v_stride) {
+void Controller::generate(char* input, char* output, int width, int height, int h_stride, int v_stride, int nrand) {
     vector<string> dirs = Controller::listdir(input);
+    srand(time(NULL));
+
     int n=0;
     for(string& s : dirs) {
       Mat image = imread(s);
@@ -31,8 +33,18 @@ void Controller::generate(char* input, char* output, int width, int height, int 
 
       Mat finalWindow = image.rowRange(y, y+height).colRange(x, x+width);
       char buf[1024];
-      sprintf(buf, "%s/%d.png", output, n++);
+      sprintf(buf, "%s/sobel_%03d.png", output, n);
       imwrite(buf, finalWindow);
+
+      for(int k=0; k<nrand; k++) {
+        int i = rand()%(image.rows-height);
+        int j = rand()%(image.cols-width);
+        Mat window = image.rowRange(i, i+height).colRange(j, j+width);
+        sprintf(buf, "%s/rand_%03d_%03d.png", output, n, k);
+        imwrite(buf, window);
+      }
+
+      n++;
     }
 }
   
@@ -121,22 +133,15 @@ void Controller::detect(Descriptor* desc, char* model, char* input, char* annota
 
   int width = 64;
   int height = 128;
-  int h_stride = 32;
-  int v_stride = 64;
+  int h_stride = 16;
+  int v_stride = 32;
 
   vector<string> images = listdir(input);
 
-  map<float, tuple<int, int>> falsePositives;
-  map<float, tuple<int, int>> truePositives;
-
-  float scales[] = {0.3, 0.5, 0.6, 0.75, 1, 1.15, 1.25};
-  for(float &s : scales) { 
-    truePositives[s] = tuple<int,int>(0,0);
-    falsePositives[s] = tuple<int, int>(0,0);
-  }
-
   for(int ii=0; ii<images.size(); ii++) {
-    cout << ii << " " << images.size() << endl;
+    int falsePositives = 0, truePositives = 0, falseSamples = 0;
+    //float scales[] = {0.5, 0.75, 1, 1.15};
+    float scales[] = {1};
 
     Mat image = imread(images[ii]);
     Mat original;
@@ -144,23 +149,11 @@ void Controller::detect(Descriptor* desc, char* model, char* input, char* annota
     resize(image, image, Size(0,0), scale, scale);
     image.copyTo(original);
 
-    size_t found = images[ii].find_last_of("/\\");
-    string file = images[ii].substr(found+1);
-    found = file.find_first_of(".");
-    string name = file.substr(0, found);
+    int dupa = 0;
 
-    char buf[1024];
-    sprintf(buf, "%s/%s.txt", annotations, name.c_str());
-
-    vector<BOX> boxes = pascal(buf, scale);
-    for(BOX& b : boxes) {
-      rectangle(image, Rect(ELEMENT(0,b), ELEMENT(1,b), ELEMENT(2,b)-ELEMENT(0,b), ELEMENT(3,b)-ELEMENT(1,b)),
-          Scalar(0, 0, 255), 2);
-    }
-
+    vector<BOX> boxes = pascal(annotation_file(annotations, images[ii]), scale);
+    vector<BOX> detections;
     for(float &s : scales) {
-      vector<BOX> detections;
-
       Mat scaled;
       resize(original, scaled, Size(0,0), s, s);
       for(int i=0; i<scaled.rows-height; i+=v_stride) {
@@ -169,13 +162,15 @@ void Controller::detect(Descriptor* desc, char* model, char* input, char* annota
           Mat sample = extract_features(desc, window);
           int predict = svm.predict(sample);
 
+          if(dupa<3) {
+            rectangle(image, Rect(j, i, width, height), Scalar(0, 0, 255), 2);
+          }
+          dupa++;
+
           if(is_false_positive(BOX(j/s, i/s, (j+width)/s, (i+height)/s), boxes)) {
-            tuple<int, int> fp = falsePositives[s];
-            int a = ELEMENT(0, fp), b = ELEMENT(1, fp);
-            a++;
+            falseSamples++;
             if(predict == 1)
-              b++;
-            falsePositives[s] = tuple<int, int>(a,b);
+              falsePositives++;
           }
 
           if(predict == 1) {
@@ -183,33 +178,26 @@ void Controller::detect(Descriptor* desc, char* model, char* input, char* annota
           }
         }
       }
-
-      int trues = count_true_positives(detections, boxes);
-      tuple<int, int> tp = truePositives[s];
-      int a = ELEMENT(0, tp), b = ELEMENT(1, tp);
-      a += boxes.size();
-      b += trues;
-      truePositives[s] = tuple<int, int>(a,b);
-
-      Mat newImage;
-      image.copyTo(newImage);
-      for(BOX& b : detections) {
-        rectangle(newImage, Rect(ELEMENT(0,b), ELEMENT(1,b), ELEMENT(2,b)-ELEMENT(0,b), ELEMENT(3,b)-ELEMENT(1,b)),
-            is_false_positive(b, boxes) ? Scalar(255,0,0) : Scalar(0, 255, 0), 2);
-      }
-
-      char buf[1024];
-      sprintf(buf, "/media/FC1A11C21A117B3A/inz/priv/det_cov3/%d_%f.png", ii, s);
-      imwrite(buf, newImage);
     }
-  }
-  cout << "false positives" << endl;
-  for(pair<const float, tuple<int,int>>& p : falsePositives) {
-    cout << p.first << " " << ELEMENT(0, p.second) << " " << ELEMENT(1, p.second) << endl;
-  }
-  cout << "true positives" << endl;
-  for(pair<const float, tuple<int,int>>& p : truePositives) {
-    cout << p.first << " " << ELEMENT(0, p.second) << " " << ELEMENT(1, p.second) << endl;
+
+    //for(BOX& b : boxes) {
+      //rectangle(image, Rect(ELEMENT(0,b), ELEMENT(1,b), ELEMENT(2,b)-ELEMENT(0,b), ELEMENT(3,b)-ELEMENT(1,b)),
+          //Scalar(0, 0, 255), 2);
+    //}
+    //for(BOX& b : detections) {
+      //rectangle(image, Rect(ELEMENT(0,b), ELEMENT(1,b), ELEMENT(2,b)-ELEMENT(0,b), ELEMENT(3,b)-ELEMENT(1,b)),
+          //is_false_positive(b, boxes) ? Scalar(255,0,0) : Scalar(0, 255, 0), 2);
+    //}
+
+    char buf[1024];
+    sprintf(buf, "/media/FC1A11C21A117B3A/inz/priv/det_cov4/%d.png", ii);
+    imwrite(buf, image);
+    int trues = count_true_positives(detections, boxes);
+    if(falsePositives > 0) {
+      //int base = round(log10((float)falsePositives/falseSamples)); 
+      cout << (float)falsePositives/falseSamples << " " << trues << " " << boxes.size() << " " << endl; 
+    }
+
   }
 };
 
@@ -230,7 +218,7 @@ void Controller::false_positives(Descriptor* desc, char* model, char* input, cha
     float scale = 450./image.rows;
     resize(image, image, Size(0,0), scale, scale);
 
-    float scales[] = {1};
+    float scales[] = {0.5, 1};
     for(float &s : scales) {
       vector<BOX> detections;
       Mat scaled;
@@ -330,7 +318,7 @@ auto Controller::is_false_positive(BOX detection, vector<BOX>& boxes) -> bool {
       int boxArea = (ELEMENT(2,b) - ELEMENT(0,b)) * (ELEMENT(3,b) - ELEMENT(1,b));
       int detectionArea = (ELEMENT(2,detection) - ELEMENT(0,detection)) * (ELEMENT(3,detection)-ELEMENT(1,detection));
 
-      if(2*width*height >= (boxArea > detectionArea ? detectionArea : boxArea))
+      if(3*width*height >= (boxArea > detectionArea ? detectionArea : boxArea))
         return false;
     }  
   }
@@ -355,7 +343,7 @@ auto Controller::count_true_positives(vector<BOX>& detections, vector<BOX>& boxe
         int boxArea = (ELEMENT(2,b) - ELEMENT(0,b)) * (ELEMENT(3,b) - ELEMENT(1,b));
         int detectionArea = (ELEMENT(2,detection) - ELEMENT(0,detection)) * (ELEMENT(3,detection)-ELEMENT(1,detection));
 
-        if(2*width*height >= (boxArea > detectionArea ? detectionArea : boxArea)) {
+        if(3*width*height >= (boxArea > detectionArea ? detectionArea : boxArea)) {
           dets++;
           break;
         } 
@@ -381,3 +369,14 @@ auto Controller::listdir(const char* path) -> vector<string>{
   closedir(pdir);
   return files;
 };
+  
+auto Controller::annotation_file(char* annotations, string file) -> string {
+  size_t found = file.find_last_of("/\\");
+  string fileName = file.substr(found+1);
+  found = fileName.find_first_of(".");
+  string name = fileName.substr(0, found);
+  char buf[1024];
+  sprintf(buf, "%s/%s.txt", annotations, name.c_str());
+  return string(buf);
+};
+
