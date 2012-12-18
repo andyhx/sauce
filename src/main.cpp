@@ -172,7 +172,11 @@ int main(int argc, char** argv) {
     }
 
     Descriptor* desc = pick_descriptor(method);
-    Controller::predict(desc, set, svm);
+    RESULT res = Controller::predict(desc, set, svm);
+
+    cout << ELEMENT(0, res) << endl;
+    cout << ELEMENT(1, res) << endl;
+    cout << ELEMENT(2, res) << endl;
   }
   else {
     Controller::show_usage();

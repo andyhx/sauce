@@ -105,7 +105,7 @@ void Controller::train(char* pos, char* neg, char* output) {
     svm.save(output);
 };
 
-void Controller::predict(Descriptor* desc, char* set, char* model) {
+RESULT Controller::predict(Descriptor* desc, char* set, char* model) {
   CvSVM svm;
   svm.load(model);
 
@@ -122,9 +122,7 @@ void Controller::predict(Descriptor* desc, char* set, char* model) {
     }
   }
   int total = ones+zeros;
-  cout << "Zeros: " << zeros << " (" << (float)(zeros)/total << ")" << endl;
-  cout << "Ones: " << ones << " (" <<  (float)ones/total << ")" << endl;
-  cout << "Total: " << total << endl;
+  return RESULT(zeros, ones, total);
 };
 
 void Controller::detect(Descriptor* desc, char* model, char* input, char* annotations) {
@@ -140,16 +138,13 @@ void Controller::detect(Descriptor* desc, char* model, char* input, char* annota
 
   for(int ii=0; ii<images.size(); ii++) {
     int falsePositives = 0, truePositives = 0, falseSamples = 0;
-    //float scales[] = {0.5, 0.75, 1, 1.15};
-    float scales[] = {1};
+    float scales[] = {0.5, 0.75, 1, 1.15};
 
     Mat image = imread(images[ii]);
     Mat original;
     float scale = 450./image.rows;
     resize(image, image, Size(0,0), scale, scale);
     image.copyTo(original);
-
-    int dupa = 0;
 
     vector<BOX> boxes = pascal(annotation_file(annotations, images[ii]), scale);
     vector<BOX> detections;
@@ -161,11 +156,6 @@ void Controller::detect(Descriptor* desc, char* model, char* input, char* annota
           Mat window = scaled.rowRange(i, i+height).colRange(j, j+width);
           Mat sample = extract_features(desc, window);
           int predict = svm.predict(sample);
-
-          if(dupa<3) {
-            rectangle(image, Rect(j, i, width, height), Scalar(0, 0, 255), 2);
-          }
-          dupa++;
 
           if(is_false_positive(BOX(j/s, i/s, (j+width)/s, (i+height)/s), boxes)) {
             falseSamples++;
@@ -189,14 +179,14 @@ void Controller::detect(Descriptor* desc, char* model, char* input, char* annota
           //is_false_positive(b, boxes) ? Scalar(255,0,0) : Scalar(0, 255, 0), 2);
     //}
 
-    char buf[1024];
-    sprintf(buf, "/media/FC1A11C21A117B3A/inz/priv/det_cov4/%d.png", ii);
-    imwrite(buf, image);
-    int trues = count_true_positives(detections, boxes);
-    if(falsePositives > 0) {
-      //int base = round(log10((float)falsePositives/falseSamples)); 
-      cout << (float)falsePositives/falseSamples << " " << trues << " " << boxes.size() << " " << endl; 
-    }
+    //char buf[1024];
+    //sprintf(buf, "/media/FC1A11C21A117B3A/inz/priv/det_cov4/%d.png", ii);
+    //imwrite(buf, image);
+    //int trues = count_true_positives(detections, boxes);
+    //if(falsePositives > 0) {
+      ////int base = round(log10((float)falsePositives/falseSamples)); 
+      //cout << (float)falsePositives/falseSamples << " " << trues << " " << boxes.size() << " " << endl; 
+    //}
 
   }
 };

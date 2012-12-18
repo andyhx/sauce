@@ -2,7 +2,7 @@
 CC=g++
 LFLAGS=-lcppunit -lopencv_core -lopencv_imgproc -lopencv_highgui -lopencv_ml -lstdc++ -lm
 CFLAGS=-std=c++11
-SOURCES=$(wildcard *.cpp)
+SOURCES=$(wildcard src/*.cpp)
 OBJECTS=$(SOURCES:.cpp=.o)
 
 all:	compile	
@@ -14,4 +14,4 @@ compile: $(OBJECTS)
 	$(CC) -c $(CFLAGS) $< -o $@
 
 clean:	
-	rm *.o
+	rm src/*.o

@@ -18,6 +18,7 @@ struct Acc {
 };
 
 typedef tuple<int, int, int, int> BOX;
+typedef tuple<int, int, int> RESULT;
 #define ELEMENT(N, TUPLE) get<N>(TUPLE)
 
 
