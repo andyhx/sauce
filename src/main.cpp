@@ -45,9 +45,9 @@ int main(int argc, char** argv) {
     Controller::false_positives(desc, classifier, input, output);
   }
   else if(strcmp("detect", argv[1]) == 0) {
-    char input[1024], annotations[1024], method[1024], classifier[1024];
+    char input[1024], annotations[1024], method[1024], classifier[1024], output[1024];
     int c;
-    while ( (c = getopt(argc, argv, "i:a:m:c:")) != -1) {
+    while ( (c = getopt(argc, argv, "i:a:m:c:o:")) != -1) {
       switch(c) {
         case 'i':
           strcpy(input, optarg);
@@ -61,11 +61,14 @@ int main(int argc, char** argv) {
         case 'c':
           strcpy(classifier, optarg);
           break;
+        case 'o':
+          strcpy(output, optarg);
+          break;
       }
     }
 
     Descriptor* desc = pick_descriptor(method); 
-    Controller::detect(desc, classifier, input, annotations);
+    Controller::detect(desc, classifier, input, annotations, output);
   }
   else if(strcmp("generate", argv[1]) == 0) {
     char* dir = argv[2];

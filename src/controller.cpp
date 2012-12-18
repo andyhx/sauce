@@ -125,16 +125,17 @@ RESULT Controller::predict(Descriptor* desc, char* set, char* model) {
   return RESULT(zeros, ones, total);
 };
 
-void Controller::detect(Descriptor* desc, char* model, char* input, char* annotations) {
+void Controller::detect(Descriptor* desc, char* model, char* input, char* annotations, char* output) {
   CvSVM svm;
   svm.load(model);
 
   int width = 64;
   int height = 128;
-  int h_stride = 16;
-  int v_stride = 32;
+  int h_stride = 64;
+  int v_stride = 128;
 
   vector<string> images = listdir(input);
+  map<int, pair<int, int>> detectionRate;
 
   for(int ii=0; ii<images.size(); ii++) {
     int falsePositives = 0, truePositives = 0, falseSamples = 0;
@@ -182,12 +183,27 @@ void Controller::detect(Descriptor* desc, char* model, char* input, char* annota
     //char buf[1024];
     //sprintf(buf, "/media/FC1A11C21A117B3A/inz/priv/det_cov4/%d.png", ii);
     //imwrite(buf, image);
-    //int trues = count_true_positives(detections, boxes);
-    //if(falsePositives > 0) {
-      ////int base = round(log10((float)falsePositives/falseSamples)); 
-      //cout << (float)falsePositives/falseSamples << " " << trues << " " << boxes.size() << " " << endl; 
-    //}
+    int trues = count_true_positives(detections, boxes);
+    if(falsePositives > 0) {
+      int base = round(log10((float)falsePositives/falseSamples)); 
+      map<int, pair<int, int>>::iterator it = detectionRate.find(base);
+      if(it == detectionRate.end()) {
+          detectionRate[base] = pair<int, int>(trues, boxes.size());
+      }
+      else {
+          pair<int, int> det = detectionRate[base];
+          detectionRate[base] = pair<int, int>(det.first + trues, det.second + boxes.size());
+      }
+      cout << (float)falsePositives/falseSamples << " " << trues << " " << boxes.size() << " " << endl; 
+    }
 
+  }
+
+  ofstream outputFile;
+  outputFile.open(output, ios::out);
+
+  for(pair<const int, pair<int, int>>& detection : detectionRate) {
+    outputFile << detection.first << " " << 1 - (float)(detection.second.first/detection.second.second) << endl;
   }
 };
 
