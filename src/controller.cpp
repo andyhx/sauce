@@ -131,8 +131,8 @@ void Controller::detect(Descriptor* desc, char* model, char* input, char* annota
 
   int width = 64;
   int height = 128;
-  int h_stride = 64;
-  int v_stride = 128;
+  int h_stride = 32;
+  int v_stride = 64;
 
   vector<string> images = listdir(input);
   map<int, pair<int, int>> detectionRate;
@@ -185,7 +185,7 @@ void Controller::detect(Descriptor* desc, char* model, char* input, char* annota
     //imwrite(buf, image);
     int trues = count_true_positives(detections, boxes);
     if(falsePositives > 0) {
-      int base = round(log10((float)falsePositives/falseSamples)); 
+      int base = round(log10((float)falsePositives/falseSamples)*4); 
       map<int, pair<int, int>>::iterator it = detectionRate.find(base);
       if(it == detectionRate.end()) {
           detectionRate[base] = pair<int, int>(trues, boxes.size());
@@ -203,7 +203,7 @@ void Controller::detect(Descriptor* desc, char* model, char* input, char* annota
   outputFile.open(output, ios::out);
 
   for(pair<const int, pair<int, int>>& detection : detectionRate) {
-    outputFile << detection.first << " " << 1 - (float)(detection.second.first/detection.second.second) << endl;
+    outputFile << detection.first*0.25 << " " << 1 - (float)(detection.second.first)/detection.second.second << endl;
   }
 };
 
