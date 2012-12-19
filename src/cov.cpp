@@ -1,5 +1,9 @@
 #include "cov.h"
 
+int Cov::blockWidth = 16;
+int Cov::hStride = 16;
+int Cov::vStride = 16;
+
 auto Cov::convert_to_grayscale(Acc a) -> Acc {
     Mat gray_image;
     cvtColor(a.m, gray_image, CV_RGB2GRAY);
@@ -12,9 +16,6 @@ auto Cov::calculate_covariances(Acc a) -> Acc {
     Mat im = a.m;
     Mat image;
     im.convertTo(image, CV_32FC1);
-    int blockWidth = 16;
-    int hStride = 16;
-    int vStride = 16;
     int covarianceMatrices = (image.rows / blockWidth) * (image.cols / blockWidth);
     Mat covs(0, 0, CV_32FC1);
 

@@ -18,8 +18,8 @@ class Controller {
   static void train(char* pos, char* neg, char* output);
   static void join_sets(char* a, char* b, char* output);
   static RESULT predict(Descriptor* desc, char* set, char* model);
-  static void detect(Descriptor* desc, char* model, char* input, char* annotations, char* output);
-  static void false_positives(Descriptor* desc, char* model, char* input, char* output);
+  static void detect(Descriptor* desc, char* model, char* input, char* annotations, char* output, int width, int height, int h_stride, int v_stride);
+  static void false_positives(Descriptor* desc, char* model, char* input, char* output, int width, int height, int h_stride, int v_stride);
 
   static void generate(char* input, char* output, int width, int height, int h_stride, int v_stride, int nrand);
 };

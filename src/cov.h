@@ -11,5 +11,9 @@ class Cov : public Descriptor {
 
   public:
   virtual vector<function<Acc(Acc)>> features(); 
+
+  static int blockWidth;
+  static int hStride;
+  static int vStride;
 };
 #endif
