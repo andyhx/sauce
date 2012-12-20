@@ -27,7 +27,7 @@ int main(int argc, char** argv) {
   if(strcmp("fp", argv[1]) == 0) {
     char input[1024], method[1024], classifier[1024], output[1024], width[1024], height[1024], block[1024];
     int c;
-    while ( (c = getopt(argc, argv, "i:m:c:o:w:h:")) != -1) {
+    while ( (c = getopt(argc, argv, "i:m:c:o:w:h:b:")) != -1) {
       switch(c) {
         case 'i':
           strcpy(input, optarg);
@@ -202,7 +202,7 @@ int main(int argc, char** argv) {
           strcpy(method, optarg);
           break;
         case 'b':
-          strcpy(method, optarg);
+          strcpy(block, optarg);
           break;
       }
     }

@@ -4,7 +4,7 @@ main([ConfigFile]) ->
   {ok, Config} = file:consult(ConfigFile),
 
   {width, Width} = lists:keyfind(width, 1, Config),
-  {height, Height} = lists:Keyfind(height, 1, Config),
+  {height, Height} = lists:keyfind(height, 1, Config),
   {width_stride, WidthStride} = lists:keyfind(width_stride, 1, Config),
   {height_stride, HeightStride} = lists:keyfind(height_stride, 1, Config),
 
@@ -12,9 +12,13 @@ main([ConfigFile]) ->
   MethodC = build_method_command(Method),
 
   {directory, Directory} = lists:keyfind(directory, 1, Config),
-  os:cmd("mkdir " ++ Directory ++ "|| mkdir " ++ Directory ++ "/fps"),
+  os:cmd("mkdir " ++ Directory ++ "; mkdir " ++ Directory ++ "/fps"),
 
-  Prefix = Directory ++ "/" ++ io_lib:format("~p", [Method]),
+  M = case Method of
+	{X, _} -> X;
+	X -> X
+  end,
+  Prefix = Directory ++ "/" ++ M,
 
   {training_pos, TrainingPos} = lists:keyfind(training_pos, 1, Config),
   {training_neg, TrainingNeg} = lists:keyfind(training_neg, 1, Config),
@@ -29,7 +33,7 @@ main([ConfigFile]) ->
   ok = test(neg, MethodC, TestNeg, Prefix ++ "_svm"),
 
   {training_fp, TrainingFp} = lists:keyfind(training_fp, 1, Config),
-  ok = fp(Method, TrainingFp, Directory ++ "/fps", Prefix ++ "_svm", Width, Height),
+  ok = fp(MethodC, TrainingFp, Directory ++ "/fps", Prefix ++ "_svm", Width, Height),
 
   {fp_probability, FpProbability} = lists:keyfind(fp_probability, 1, Config),
   ok = extract(MethodC, Directory ++ "/fps", Prefix ++ "_fp", FpProbability),
@@ -86,6 +90,7 @@ do_test(Set, Method, InputSet, Classifier) ->
                                    {"c", Classifier},
                                    {"m", Method}]),
 
+io:format("~p~n", [Command]),
   Res = os:cmd(Command),
   [Zeros, Ones, Total | _] = re:split(Res, "\n", [{return, list}]),
   case Set of
@@ -97,6 +102,7 @@ fp(Method, InputSet, OutputDirectory, Classifier, Width, Height) ->
   Command = build_command("fp", [{"i", InputSet},
                                  {"o", OutputDirectory},
                                  {"c", Classifier},
+				 {"m", Method},
                                  {"w", Width},
                                  {"h", Height}]),
 
@@ -129,14 +135,15 @@ detect(Method, InputSet, Annotations, Classifier, Output, Width, Height, WidthSt
                                      {"x", WidthStride},
                                      {"y", HeightStride}]),
   io:format("Started detection on set ~p with annotations ~p, output will be saved to ~p~n", [InputSet, Annotations, Output]),
-  {Time, []} = timer:tc(fun() -> os:cmd(Command) end),
+  {Time, _} = timer:tc(fun() -> os:cmd(Command) end),
   io:format("Total:\t~p~n", [Time / 1000000]),
   ok.
 
 build_command(Command, Parameters) ->
   lists:foldl(fun({Param, Value}, Acc) ->
+	 io:format("~p~n", [Acc ++ " -" ++ Param ++ " " ++ Value]),
           Acc ++ " -" ++ Param ++ " " ++ Value
-      end, "./sauce" ++ Command, Parameters).
+      end, "./sauce " ++ Command, Parameters).
 
 build_method_command({Method, Parameters}) when is_list(Parameters) ->
   lists:foldl(fun({Param, Value}, Acc) ->

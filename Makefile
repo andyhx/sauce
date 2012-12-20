@@ -1,7 +1,7 @@
 .PHONY: all compile clean
 CC=g++
-LFLAGS=-lcppunit -lopencv_core -lopencv_imgproc -lopencv_highgui -lopencv_ml -lstdc++ -lm
-CFLAGS=-std=c++11
+LFLAGS=-lopencv_core -lopencv_imgproc -lopencv_highgui -lopencv_ml -lstdc++ -lm
+CFLAGS=-std=c++0x
 SOURCES=$(wildcard src/*.cpp)
 OBJECTS=$(SOURCES:.cpp=.o)
 

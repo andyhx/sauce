@@ -131,14 +131,16 @@ void Controller::detect(Descriptor* desc, char* model, char* input, char* annota
 
   vector<string> images = listdir(input);
   map<int, pair<int, int>> detectionRate;
+  ofstream outputFile;
+  outputFile.open(output, ios::out);
 
   for(int ii=0; ii<images.size(); ii++) {
     int falsePositives = 0, truePositives = 0, falseSamples = 0;
-    float scales[] = {0.5, 0.75, 1, 1.15};
+    float scales[] = {0.25, 0.5, 0.75, 1};
 
     Mat image = imread(images[ii]);
     Mat original;
-    float scale = 450./image.rows;
+    float scale = 600./image.rows;
     resize(image, image, Size(0,0), scale, scale);
     image.copyTo(original);
 
@@ -180,7 +182,7 @@ void Controller::detect(Descriptor* desc, char* model, char* input, char* annota
     //imwrite(buf, image);
     int trues = count_true_positives(detections, boxes);
     if(falsePositives > 0) {
-      int base = round(log10((float)falsePositives/falseSamples)*4); 
+      int base = round(log10((float)falsePositives/falseSamples)); 
       map<int, pair<int, int>>::iterator it = detectionRate.find(base);
       if(it == detectionRate.end()) {
           detectionRate[base] = pair<int, int>(trues, boxes.size());
@@ -189,16 +191,12 @@ void Controller::detect(Descriptor* desc, char* model, char* input, char* annota
           pair<int, int> det = detectionRate[base];
           detectionRate[base] = pair<int, int>(det.first + trues, det.second + boxes.size());
       }
-      cout << (float)falsePositives/falseSamples << " " << trues << " " << boxes.size() << " " << endl; 
+      outputFile << (float)falsePositives/falseSamples << " " << trues << " " << boxes.size() << " " << endl; 
     }
-
   }
 
-  ofstream outputFile;
-  outputFile.open(output, ios::out);
-
   for(pair<const int, pair<int, int>>& detection : detectionRate) {
-    outputFile << detection.first*0.25 << " " << 1 - (float)(detection.second.first)/detection.second.second << endl;
+    outputFile << detection.first << " " << 1 - (float)(detection.second.first)/detection.second.second << endl;
   }
 };
 
@@ -211,10 +209,10 @@ void Controller::false_positives(Descriptor* desc, char* model, char* input, cha
 
   for(string& s : images) {
     Mat image = imread(s);
-    float scale = 450./image.rows;
+    float scale = 600./image.rows;
     resize(image, image, Size(0,0), scale, scale);
 
-    float scales[] = {0.5, 1};
+    float scales[] = {0.5, 0.75, 1};
     for(float &s : scales) {
       vector<BOX> detections;
       Mat scaled;
@@ -339,7 +337,7 @@ auto Controller::count_true_positives(vector<BOX>& detections, vector<BOX>& boxe
         int boxArea = (ELEMENT(2,b) - ELEMENT(0,b)) * (ELEMENT(3,b) - ELEMENT(1,b));
         int detectionArea = (ELEMENT(2,detection) - ELEMENT(0,detection)) * (ELEMENT(3,detection)-ELEMENT(1,detection));
 
-        if(3*width*height >= (boxArea > detectionArea ? detectionArea : boxArea)) {
+        if(2*width*height >= (boxArea > detectionArea ? detectionArea : boxArea)) {
           dets++;
           break;
         } 
