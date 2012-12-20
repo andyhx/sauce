@@ -1,5 +1,9 @@
 #include "hog.h"
 
+int HOG::blockWidth = 3;
+int HOG::cellWidth = 8;
+int HOG::bins = 9;
+
 auto HOG::convert_to_grayscale(Acc a) -> Acc {
     Mat gray_image;
     cvtColor(a.m, gray_image, CV_RGB2GRAY);
@@ -42,21 +46,18 @@ auto HOG::calculate_magnitude_orientation(Acc a) -> Acc {
 }
 
 auto HOG::perform_binning(Acc a) -> Acc {
-    int cellWidth = 8;
-    int binsNo = 9;
-
     Mat mag = get<0>(a.t2);
     Mat orient = get<1>(a.t2);
     int xCells = mag.cols / cellWidth;
     int yCells = mag.rows / cellWidth;
 
-    Mat angleLut = Mat::zeros(binsNo, 1, CV_32FC1);
+    Mat angleLut = Mat::zeros(bins, 1, CV_32FC1);
     Mat xLut = Mat::zeros(xCells, 1, CV_32FC1);
     Mat yLut = Mat::zeros(yCells, 1, CV_32FC1);
-    Mat bins = Mat::zeros(xCells*yCells, binsNo, CV_32FC1);
+    Mat bins = Mat::zeros(xCells*yCells, HOG::bins, CV_32FC1);
 
-    for(int i=0; i<binsNo; i++) {
-      angleLut.at<float>(i, 0) = (CV_PI/binsNo) * (i+0.5);
+    for(int i=0; i<HOG::bins; i++) {
+      angleLut.at<float>(i, 0) = (CV_PI/HOG::bins) * (i+0.5);
     }
     for(int i=0; i<xCells; i++) {
       xLut.at<float>(i, 0) = (float)mag.cols/xCells * (i+0.5);
@@ -68,7 +69,7 @@ auto HOG::perform_binning(Acc a) -> Acc {
     for(int i=0; i<mag.rows; i++) {
       for(int j=0; j<mag.cols; j++) {
         float angle = orient.at<float>(i,j);
-        int bin = round(angle/CV_PI * binsNo);
+        int bin = round(angle/CV_PI * HOG::bins);
 
         int angleBin2, angleBin1;
         float ca1, ca2;
@@ -78,9 +79,9 @@ auto HOG::perform_binning(Acc a) -> Acc {
           ca1 = 0;
           ca2 = 1;
         }
-        else if(bin == binsNo) {
-          angleBin2 = binsNo-1;
-          angleBin1 = binsNo-1;
+        else if(bin == HOG::bins) {
+          angleBin2 = HOG::bins-1;
+          angleBin1 = HOG::bins-1;
           ca1 = 0;
           ca2 = 1;
         }
@@ -164,13 +165,36 @@ auto HOG::perform_binning(Acc a) -> Acc {
 }
 
 auto HOG::normalize_blocks(Acc a) -> Acc {
-    int blockWidth = 3;
     Mat bins = a.m;
     for(int i=0; i<bins.rows; i++) {
       Mat row = bins.rowRange(i, i+1);
-      row = row / (norm(row, NORM_L2) + 0.001);
+      row /= (norm(row, NORM_L2) + 0.001);
     }
     return a;
+    //Mat bins = a.m;
+    //Mat mag = get<0>(a.t2);
+    //int xCells = mag.cols / cellWidth;
+    //int yCells = mag.rows / cellWidth;
+    //Mat newBins(0,0,CV_32FC1);
+
+    //for(int i=0; i<xCells-blockWidth+1; i+=blockWidth) {
+      //for(int j=0; j<yCells-blockWidth+1; j+=blockWidth) {
+        //Mat blocks(0,0,CV_32FC1);
+
+        //for(int k=0; k<blockWidth; k++) {
+          //for(int n=0; n<blockWidth; n++) {
+            //blocks.push_back(bins.rowRange(i+j*xCells+n, i+j*xCells+n+1));
+          //}
+        //}
+
+        //blocks /= (norm(blocks, NORM_L2) + 0.001);
+        //for(int k=0; k<blocks.rows; k++) {
+          //newBins.push_back(blocks.rowRange(k, k+1));
+        //}
+      //}
+    //}
+    //a.m = newBins;
+    //return a;
 }
 
 auto HOG::flatten_features(Acc a) -> Acc {

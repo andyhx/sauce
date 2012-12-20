@@ -13,5 +13,9 @@ class HOG : public Descriptor {
 
   public:
   virtual vector<function<Acc(Acc)>> features(); 
+
+  static int blockWidth;
+  static int cellWidth;
+  static int bins;
 };
 #endif

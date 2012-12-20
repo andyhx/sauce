@@ -149,8 +149,8 @@ void Controller::detect(Descriptor* desc, char* model, char* input, char* annota
     for(float &s : scales) {
       Mat scaled;
       resize(original, scaled, Size(0,0), s, s);
-      for(int i=0; i<scaled.rows-height; i+=v_stride) {
-        for(int j=0; j<scaled.cols-width; j+=h_stride) {
+      for(int i=0; i<scaled.rows-height+1; i+=v_stride) {
+        for(int j=0; j<scaled.cols-width+1; j+=h_stride) {
           Mat window = scaled.rowRange(i, i+height).colRange(j, j+width);
           Mat sample = extract_features(desc, window);
           int predict = svm.predict(sample);
@@ -218,8 +218,8 @@ void Controller::false_positives(Descriptor* desc, char* model, char* input, cha
       Mat scaled;
       resize(image, scaled, Size(0,0), s, s);
 
-      for(int i=0; i<scaled.rows-height; i+=v_stride) {
-        for(int j=0; j<scaled.cols-width; j+=h_stride) {
+      for(int i=0; i<scaled.rows-height+1; i+=v_stride) {
+        for(int j=0; j<scaled.cols-width+1; j+=h_stride) {
           Mat window = scaled.rowRange(i, i+height).colRange(j, j+width);
           Mat sample = extract_features(desc, window);
           int predict = svm.predict(sample);
