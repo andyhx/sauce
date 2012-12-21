@@ -6,6 +6,7 @@
 class LBP : public Descriptor {
   static auto convert_to_grayscale(Acc a) -> Acc;
   static auto threshold_masks(Acc a) -> Acc;
+  static auto flatten_features(Acc a) -> Acc;
 
   public:
   virtual vector<function<Acc(Acc)>> features(); 

@@ -254,20 +254,23 @@ void Controller::false_positives(Descriptor* desc, char* model, char* input, cha
 
     float scales[] = {0.5, 0.75, 1};
     for(float &s : scales) {
-      vector<BOX> detections;
-      Mat scaled;
-      resize(image, scaled, Size(0,0), s, s);
+      if(n<10000) {
+        vector<BOX> detections;
+        Mat scaled;
+        resize(image, scaled, Size(0,0), s, s);
 
-      for(int i=0; i<scaled.rows-height+1; i+=v_stride) {
-        for(int j=0; j<scaled.cols-width+1; j+=h_stride) {
-          Mat window = scaled.rowRange(i, i+height).colRange(j, j+width);
-          Mat sample = extract_features(desc, window);
-          int predict = svm.predict(sample);
-          if(predict == 1) {
-            BOX detection(j/s, i/s, (j+width)/s, (i+height)/s);
-            char buf[1024];
-            sprintf(buf, "%s/fp_%04d.png", output, n++);
-            imwrite(buf, window);
+        for(int i=0; i<scaled.rows-height+1; i+=v_stride) {
+          for(int j=0; j<scaled.cols-width+1; j+=h_stride) {
+            Mat window = scaled.rowRange(i, i+height).colRange(j, j+width);
+            Mat sample = extract_features(desc, window);
+            int predict = svm.predict(sample);
+            if(predict == 1) {
+              BOX detection(j/s, i/s, (j+width)/s, (i+height)/s);
+              char buf[1024];
+              sprintf(buf, "%s/fp_%04d.png", output, n++);
+              imwrite(buf, window);
+            }
+            if(n == 10000) break;
           }
         }
       }

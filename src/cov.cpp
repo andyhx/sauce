@@ -19,8 +19,8 @@ auto Cov::calculate_covariances(Acc a) -> Acc {
     int covarianceMatrices = (image.rows / blockWidth) * (image.cols / blockWidth);
     Mat covs(0, 0, CV_32FC1);
 
-    for(int i=0; i<image.rows-blockWidth; i+=vStride) {
-      for(int j=0; j<image.cols-blockWidth; j+=hStride) {
+    for(int i=0; i<image.rows-blockWidth+1; i+=vStride) {
+      for(int j=0; j<image.cols-blockWidth+1; j+=hStride) {
           Mat block = image.rowRange(i, i+blockWidth).colRange(j, j+blockWidth);
           Mat Ix, Iy, Ixx, Iyy;
           Sobel(block, Ix, -1, 1, 0);
