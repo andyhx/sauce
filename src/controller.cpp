@@ -6,6 +6,46 @@ void Controller::show_usage() {
   cout << "command = extract | train | test" << endl;
 }
 
+void Controller::generate_edges(char* a, char* b, char* output, int n) {
+   vector<string> aFiles = Controller::listdir(a);
+   vector<string> bFiles = Controller::listdir(b);
+   vector<string> files;
+   files.reserve(aFiles.size() + bFiles.size());
+   files.insert(files.end(), aFiles.begin(), aFiles.end());
+   files.insert(files.end(), bFiles.begin(), bFiles.end());
+   srand(time(NULL)); 
+   Mat edgelets(0, 0, CV_8UC1);
+
+   for(string& file : files) {
+     Mat image = imread(file);
+     int x = rand() % (image.cols - n);
+     int y = rand() % (image.rows - n);
+     Mat grad = (Mat_<char>(3,1) << 1, 0, -1);
+     Mat gradient_x;
+     Mat gradient_y;
+     filter2D(image, gradient_x, -1, grad);
+     filter2D(image, gradient_y, -1, grad.t());
+     Mat output(n, n, CV_8UC1);
+     for(int i=0; i<n; i++) {
+       for(int j=0; j<n; j++) {
+         float vx = (float)gradient_x.at<short int>(y+i,x+j);
+         float vy = (float)gradient_y.at<short int>(y+i,x+j);
+         float orient = atan2(vy,vx);
+         if(orient < 0) {
+           orient += CV_PI;
+         }
+         int bin = round((orient*6)/CV_PI)+1;
+         if(bin == 7) bin = 1;
+         output.at<unsigned char>(i,j) = bin;
+       }
+     }
+     output = output.reshape(0, 1);
+     edgelets.push_back(output);
+   }
+   FileStorage fs(output, FileStorage::WRITE);
+   fs << "edgelets" << edgelets;
+}
+
 void Controller::generate(char* input, char* output, int width, int height, int h_stride, int v_stride, int nrand) {
     vector<string> dirs = Controller::listdir(input);
     srand(time(NULL));

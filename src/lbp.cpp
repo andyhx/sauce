@@ -1,6 +1,6 @@
 #include "lbp.h"
 
-int LBP::mask = 3;
+int LBP::blockWidth = 16;
 int LBP::threshold = 30;
 
 auto LBP::convert_to_grayscale(Acc a) -> Acc {
@@ -14,8 +14,8 @@ auto LBP::threshold_masks(Acc a) -> Acc {
   Mat image = a.m;
 
   Mat features;
-  for(int i=0; i<image.rows-mask+1; i++) {
-    for(int j=0; j<image.cols-mask+1; j++) {
+  for(int i=0; i<image.rows-2; i+=3) {
+    for(int j=0; j<image.cols-2; j+=3) {
       Mat kernel = image.rowRange(i, i+3).colRange(j, j+3);
       int centerVal = kernel.at<unsigned char>(1, 1);
 

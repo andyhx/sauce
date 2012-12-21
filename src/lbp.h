@@ -13,7 +13,7 @@ class LBP : public Descriptor {
   public:
   virtual vector<function<Acc(Acc)>> features(); 
 
-  static int mask;
+  static int blockWidth; 
   static int threshold;
 };
 #endif

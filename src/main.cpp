@@ -2,6 +2,7 @@
 #include "hog.h"
 #include "cov.h"
 #include "lbp.h"
+#include "edge.h"
 #include "controller.h"
 #include "descriptor.h"
 
@@ -19,6 +20,13 @@ int main(int argc, char** argv) {
       desc = new LBP();
       LBP::threshold = atoi(n);
     }
+    else if(strcmp("edge", method) == 0) {
+      desc = new Edge();
+      Edge::n = atoi(n);
+      FileStorage edgelets(k, FileStorage::READ);
+      Mat edges; edgelets["edgelets"] >> edges;
+      Edge::edgelets = edges;
+    }
     else {
       desc = new Cov();
       Cov::blockWidth = atoi(b);
@@ -32,7 +40,28 @@ int main(int argc, char** argv) {
     Controller::show_usage();
     return 0;
   }
-  if(strcmp("fp", argv[1]) == 0) {
+  if(strcmp("genedge", argv[1]) == 0) {
+    char a[1024], b[1024], output[1024], n[1024];
+    int c;
+    while ( (c = getopt(argc, argv, "a:b:o:n:")) != -1) {
+      switch(c) {
+        case 'a':
+          strcpy(a, optarg);
+          break;
+        case 'b':
+          strcpy(b, optarg);
+          break;
+        case 'o':
+          strcpy(output, optarg);
+          break;
+        case 'n':
+          strcpy(n, optarg);
+          break;
+      }
+    }
+    Controller::generate_edges(a, b, output, atoi(n));
+  }
+  else if(strcmp("fp", argv[1]) == 0) {
     char input[1024], classifier[1024], output[1024], width[1024], height[1024];
     char method[1024], b[1024], k[1024], n[1024];
     int c;
