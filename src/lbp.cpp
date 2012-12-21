@@ -20,21 +20,22 @@ auto LBP::threshold_masks(Acc a) -> Acc {
   for(int i=0; i<image.rows-blockWidth+1; i+=vStride) {
     for(int j=0; j<image.cols-blockWidth+1; j+=hStride) {
       Mat block = image.rowRange(i, i+blockWidth).colRange(j, j+blockWidth);
-      Mat histogram = Mat::zeros(1, 1023, CV_32FC1);
+      Mat histogram = Mat::zeros(1, 512, CV_32FC1);
 
       for(int ii=0; ii<block.rows-2; ii++) {
         for(int jj=0; jj<block.cols-2; jj++) {
           Mat kernel = block.rowRange(ii, ii+3).colRange(jj, jj+3);
+          Mat output = (Mat_<unsigned char>(8,1) << kernel.at<unsigned char>(0,0), kernel.at<unsigned char>(0,1), kernel.at<unsigned char>(0,2),
+              kernel.at<unsigned char>(1,2), kernel.at<unsigned char>(2,2), kernel.at<unsigned char>(2,1),
+              kernel.at<unsigned char>(2,0), kernel.at<unsigned char>(1,0));
 
           int value = 0;
-          for(int iii=0;iii<kernel.rows;iii++) {
-            for(int jjj=0;jjj<kernel.cols;jjj++) {
-              if(abs(kernel.at<unsigned char>(iii,jjj) - kernel.at<unsigned char>(1,1)) > threshold) {
-                value = (value << 1) | 1;
-              }
-              else {
-                value = (value << 1);
-              }
+          for(int iii=0;iii<output.rows;iii++) {
+            if(abs(output.at<unsigned char>(iii,0) - kernel.at<unsigned char>(1,1)) > threshold) {
+              value = (value << 1) | 1;
+            }
+            else {
+              value = (value << 1);
             }
           }
           histogram.at<float>(0, value)++;
