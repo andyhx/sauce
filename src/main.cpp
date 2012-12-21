@@ -17,6 +17,7 @@ int main(int argc, char** argv) {
     }
     else if(strcmp("lbp", method) == 0) {
       desc = new LBP();
+      LBP::threshold = atoi(n);
     }
     else {
       desc = new Cov();

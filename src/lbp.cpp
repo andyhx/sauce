@@ -16,31 +16,19 @@ auto LBP::threshold_masks(Acc a) -> Acc {
   Mat features;
   for(int i=0; i<image.rows-mask+1; i++) {
     for(int j=0; j<image.cols-mask+1; j++) {
-      Mat kernel = image.rowRange(i, i+mask).colRange(j, j+mask);
-      int center = round(mask/2.)-1;
-      int centerVal = image.at<unsigned char>(center, center);
+      Mat kernel = image.rowRange(i, i+3).colRange(j, j+3);
+      int centerVal = kernel.at<unsigned char>(1, 1);
 
-      Mat output = Mat::zeros(4*(mask-1), 1, CV_8UC1);
-      Mat edge = kernel.rowRange(0, 1).colRange(0, mask-1).t();
+      Mat output = (Mat_<unsigned char>(8,1) << kernel.at<unsigned char>(0,0), kernel.at<unsigned char>(0,1), kernel.at<unsigned char>(0,2),
+        kernel.at<unsigned char>(1,2), kernel.at<unsigned char>(2,2), kernel.at<unsigned char>(2,1),
+        kernel.at<unsigned char>(2,0), kernel.at<unsigned char>(1,0));
 
-      edge.push_back(kernel.rowRange(0, mask-1).colRange(mask-1, mask));
-      Mat botRev = kernel.rowRange(mask-1, mask).colRange(1, mask).t();
-      Mat lefRev = kernel.rowRange(1, mask).colRange(0, 1);
-
-      Mat bot(botRev.rows, 1, CV_8UC1);
-      for(int i=0; i<botRev.rows; i++) {
-        bot.at<unsigned char>(i, 0) = botRev.at<unsigned char>(botRev.rows-i-1, 0);
-      }
-      Mat lef(lefRev.rows, 1, CV_8UC1);
-      for(int i=0; i<lefRev.rows; i++) {
-        lef.at<unsigned char>(i, 0) = lefRev.at<unsigned char>(lefRev.rows-i-1, 0);
-      }
-      edge.push_back(bot);
-      edge.push_back(lef);
-
-      for(int ii=0; ii<edge.rows; ii++) {
-        if(abs(edge.at<unsigned char>(ii, 0) - centerVal) > threshold) {
+      for(int ii=0; ii<output.rows; ii++) {
+        if(abs(output.at<unsigned char>(ii, 0) - centerVal) > threshold) {
           output.at<unsigned char>(ii, 0) = 1;
+        }
+        else {
+          output.at<unsigned char>(ii, 0) = 0;
         }
       }
 
@@ -69,12 +57,12 @@ auto LBP::perform_binning(Acc a) -> Acc {
       Mat arcs(0, 0, CV_8UC1);
       
       for(int j=0; j<=features.cols; j++) {
-        //if(j==features.cols && insideArc) {
-          //insideArc = 0;
-          //Mat arc = (Mat_<unsigned char>(1,2) << arcStart, j);
-          //arcs.push_back(arc);
-          //break;
-        //}
+        if(j==features.cols && insideArc) {
+          insideArc = 0;
+          Mat arc = (Mat_<unsigned char>(1,2) << arcStart, j);
+          arcs.push_back(arc);
+          break;
+        }
         if(feature.at<unsigned char>(0, j) == 1 && insideArc == 0){
           arcStart = j+1;
           insideArc = 1;
@@ -87,7 +75,7 @@ auto LBP::perform_binning(Acc a) -> Acc {
       }
       int angle = 0;
       int length = 0;
-      if(arcs.rows == 2 && arcs.at<unsigned char>(0,0) == 1 && arcs.at<unsigned char>(1,1) == features.cols-1) {
+      if(arcs.rows == 2 && arcs.at<unsigned char>(0,0) == 1 && arcs.at<unsigned char>(1,1) == features.cols) {
           angle = arcs.at<unsigned char>(1,0);
           length = arcs.at<unsigned char>(1,1)-angle+1+arcs.at<unsigned char>(0,1);
       }
