@@ -4,7 +4,12 @@
 
 class Descriptor {
   public:
-  Acc iterate(Acc a);
+  virtual Acc iterate(Acc acc) {
+    for(function<Acc(Acc)>& fun : this->features()) {
+      acc = fun(acc);
+    }
+    return acc;
+  };
   virtual vector<function<Acc(Acc)>> features() = 0;
 };
 

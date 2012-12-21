@@ -3,6 +3,8 @@
 #include "cov.h"
 #include "lbp.h"
 #include "edge.h"
+#include "covlbp.h"
+#include "hoglbp.h"
 #include "controller.h"
 #include "descriptor.h"
 
@@ -20,6 +22,12 @@ int main(int argc, char** argv) {
       desc = new LBP();
       LBP::threshold = atoi(n);
       LBP::blockWidth = atoi(b);
+    }
+    else if(strcmp("covlbp", method) == 0) {
+      desc = new CovLBP();
+    }
+    else if(strcmp("hoglbp", method) == 0) {
+      desc = new HOGLBP();
     }
     else if(strcmp("edge", method) == 0) {
       desc = new Edge();

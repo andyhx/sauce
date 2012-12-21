@@ -1,7 +1,7 @@
 #include "lbp.h"
 
 int LBP::blockWidth = 32;
-int LBP::threshold = 30;
+int LBP::threshold = 15;
 
 auto LBP::convert_to_grayscale(Acc a) -> Acc {
     Mat gray_image;

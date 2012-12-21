@@ -16,6 +16,7 @@ void Controller::generate_edges(char* a, char* b, char* output, int n) {
    srand(time(NULL)); 
    Mat edgelets(0, 0, CV_8UC1);
 
+   int number = 0;
    for(string& file : files) {
      Mat image = imread(file);
      int x = rand() % (image.cols - n);
@@ -41,6 +42,7 @@ void Controller::generate_edges(char* a, char* b, char* output, int n) {
      }
      output = output.reshape(0, 1);
      edgelets.push_back(output);
+     if(++number == 300) break;
    }
    FileStorage fs(output, FileStorage::WRITE);
    fs << "edgelets" << edgelets;
