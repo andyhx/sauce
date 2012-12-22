@@ -23,6 +23,7 @@ class Controller {
 
   static void generate(char* input, char* output, int width, int height, int h_stride, int v_stride, int nrand);
   static void generate_edges(char* a, char* b, char* output, int n);
+  static void tag_pascal(char* i, char* a, char* o);
 };
 
 #endif

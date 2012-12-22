@@ -6,6 +6,16 @@ void Controller::show_usage() {
   cout << "command = extract | train | test" << endl;
 }
 
+void Controller::tag_pascal(char* i, char* a, char* output) {
+    Mat image = imread(i);
+    vector<BOX> boxes = pascal(a, 1.0);
+    for(BOX& b : boxes) {
+      rectangle(image, Rect(ELEMENT(0,b), ELEMENT(1,b), ELEMENT(2,b)-ELEMENT(0,b), ELEMENT(3,b)-ELEMENT(1,b)),
+          Scalar(0, 0, 255), 2);
+    }
+    imwrite(output, image);
+}
+
 void Controller::generate_edges(char* a, char* b, char* output, int n) {
    vector<string> aFiles = Controller::listdir(a);
    vector<string> bFiles = Controller::listdir(b);
@@ -357,7 +367,7 @@ auto Controller::is_false_positive(BOX detection, vector<BOX>& boxes) -> bool {
       int boxArea = (ELEMENT(2,b) - ELEMENT(0,b)) * (ELEMENT(3,b) - ELEMENT(1,b));
       int detectionArea = (ELEMENT(2,detection) - ELEMENT(0,detection)) * (ELEMENT(3,detection)-ELEMENT(1,detection));
 
-      if(3*width*height >= (boxArea > detectionArea ? detectionArea : boxArea))
+      if(2*width*height >= (boxArea > detectionArea ? detectionArea : boxArea))
         return false;
     }  
   }

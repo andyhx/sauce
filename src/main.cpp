@@ -49,7 +49,25 @@ int main(int argc, char** argv) {
     Controller::show_usage();
     return 0;
   }
-  if(strcmp("genedge", argv[1]) == 0) {
+  if(strcmp("pascal", argv[1]) == 0) {
+    char i[1024], a[1024], o[1024];
+    int c;
+    while( (c = getopt(argc, argv, "i:a:o:")) != -1) {
+      switch(c) {
+        case 'i':
+          strcpy(i, optarg);
+          break;
+        case 'a':
+          strcpy(a, optarg);
+          break;
+        case 'o':
+          strcpy(o, optarg);
+          break;
+      }
+    }
+    Controller::tag_pascal(i,a,o);
+  }
+  else if(strcmp("genedge", argv[1]) == 0) {
     char a[1024], b[1024], output[1024], n[1024];
     int c;
     while ( (c = getopt(argc, argv, "a:b:o:n:")) != -1) {
