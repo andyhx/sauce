@@ -264,7 +264,7 @@ void Controller::false_positives(Descriptor* desc, char* model, char* input, cha
     float scale = 600./image.rows;
     resize(image, image, Size(0,0), scale, scale);
 
-    float scales[] = {0.5, 0.75, 1};
+    float scales[] = {0.75};
     for(float &s : scales) {
       if(n<10000) {
         vector<BOX> detections;
