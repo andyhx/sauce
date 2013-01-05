@@ -1,0 +1,96 @@
+\documentclass[pdflatex,11pt]{aghdpl}
+% \documentclass{aghdpl}               % przy kompilacji programem latex
+% \documentclass[pdflatex,en]{aghdpl}  % praca w języku angielskim
+\usepackage[polish]{babel}
+\usepackage[utf8]{inputenc}
+
+% dodatkowe pakiety
+\usepackage{enumerate}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage[polish]{algorithm2e}
+\usepackage{longtable}
+\usepackage{listings}
+\usepackage{bm}
+\usepackage{amsmath}
+\lstloadlanguages{TeX}
+
+\lstset{
+  literate={ą}{{\k{a}}}1
+           {ć}{{\'c}}1
+           {ę}{{\k{e}}}1
+           {ó}{{\'o}}1
+           {ń}{{\'n}}1
+           {ł}{{\l{}}}1
+           {ś}{{\'s}}1
+           {ź}{{\'z}}1
+           {ż}{{\.z}}1
+           {Ą}{{\k{A}}}1
+           {Ć}{{\'C}}1
+           {Ę}{{\k{E}}}1
+           {Ó}{{\'O}}1
+           {Ń}{{\'N}}1
+           {Ł}{{\L{}}}1
+           {Ś}{{\'S}}1
+           {Ź}{{\'Z}}1
+           {Ż}{{\.Z}}1
+}
+
+%---------------------------------------------------------------------------
+
+\author{Rafał Studnicki}
+\shortauthor{R. Studnicki}
+
+\titlePL{Analiza wybranych deskryptorów cech wykorzystywanych w algorytmach detekcji obiektów
+}
+\titleEN{Analysis of feature descriptors used in object detection algorithms}
+
+\shorttitlePL{Analiza wybranych deskryptorów cech wykorzystywanych w algorytmach detekcji obiektów} 
+\shorttitleEN{Analysis of feature descriptors used in object detection algorithms}
+
+\thesistypePL{Praca inżynierska}
+\thesistypeEN{Bachelor of Science Thesis}
+
+\supervisorPL{dr hab. inż. Marek Gorgoń,\\prof. nz. AGH}
+\supervisorEN{Marek Gorgoń Ph.D Eng.}
+
+\date{2012}
+
+\departmentPL{Katedra Automatyki i Inżynierii Biomedycznej}
+\departmentEN{Department of Automatics and Biomedical Engineering}
+
+\facultyPL{Wydział Elektrotechniki, Automatyki, Informatyki i Inżynierii Biomedycznej}
+\facultyEN{Faculty of Electrical Engineering, Automatics, Computer Science and Biomedical Engineering}
+
+\acknowledgements{Miejsce na podziękowania}
+
+\setlength{\cftsecnumwidth}{10mm}
+
+%---------------------------------------------------------------------------
+
+\begin{document}
+
+\titlepages
+
+\tableofcontents
+\clearpage
+
+\include{rozdzial1}
+\include{rozdzial2}
+\include{rozdzial3}
+\include{rozdzial4}
+\include{rozdzial5}
+\include{rozdzial6}
+
+
+
+% itd.
+% \appendix
+% \include{dodatekA}
+% \include{dodatekB}
+% itd.
+
+\bibliographystyle{alpha}
+\bibliography{bibliografia}
+
+\end{document}

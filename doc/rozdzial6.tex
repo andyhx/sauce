@@ -1,0 +1,12 @@
+\chapter{Podsumowanie}
+\label{cha:wnioski}
+
+W niniejszej pracy przeprowadzono badania literatury naukowej pod kątem wybranych metod tworzenia deskryptorów cech używanych w metodach detekcji obiektów. Ponadto, zaprezentowano kompletną metodologię służącą do przebadania, zarówno pod kątem jakościowym jak i złożoności, danej metody - począwszy od generacji negatywnego zbioru testowego, przez ekstrakcję cech, budowę pierwszego i dotrenowanego klasyfikatora, walidacje klasyfikatora, aż po budowę rozkładu błędu detekcji, który jest pomocnym narzędziem przy wyborze metody detekcji do konkretnego zastosowania.
+
+Korzystając z powyższej metodologii przebadano trzy z czterech przeanalizowanych metod i porównano je. Dokonano także próby przystosowania ostatniej z nich, metody \textit{edgelets} do metodologii, w~której do klasyfikacji używany jest mocny klasyfikator, jak SVM.
+
+Oprócz tego przebadano, korzystając z tej samej metodologii, efekt połączenia ze sobą dwóch metod. Jak wynika z przeprowadzonych badań, łączenie działania deskryptorów pozwala na polepszenie skuteczności detekcji, gdy połączone deskryptory zawierają niepokrywające się ze sobą informacje oraz metody te nie są dedykowane konkretnemu zastosowaniu. Takie ulepszenie odbywa się jednak kosztem złożoności czasowej.
+
+W dalszej pracy warto dokonać próby budowy metody, podobnej do metody \textit{edgelets}, jednak potrafiącej dobrze opisywać obraz wejściowy przy pomocy niezbyt długiego wektora cech.
+Można również zastanowić się nad znalezieniem deskryptora bazującego na metodzie LBP, jednak posiadającego lepsze właściwości opisu orientacji i długości krawędzi na obrazie. Próby takiej dokonali autorzy pracy \cite{Zhao07}, jednak w bardziej wymagających testach metoda ta okazuje się zawodna, prawdopodobnie poprzez zbyt ogólny deskryptor.
+W dalszej pracy warto również przeprowadzić badania prowadzące do możliwości optymalizacji zaprezentowanych metod i algorytmów pod kątem zrównoleglenia wykonywania poszczególnych operacji prowadzących do obliczenia wartości żądanego deskryptora cech. Zbadanie możliwości wykonywania części lub całości poszczególnych algorytmów na wielu rdzeniach jednocześnie pozwoli na zastanowienie się nad możliwością ich przyspieszenia w rzeczywistych zastosowaniach.

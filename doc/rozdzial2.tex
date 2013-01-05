@@ -1,0 +1,91 @@
+\chapter{Wykorzystanie deskryptorów cech w zadaniach detekcji obiektów}
+\label{cha:prace}
+
+W rozdziale tym przedstawiono przegląd literatury dotyczący wybranych metod detekcji obiektów na obrazie opierające się na deskryptorach cech, a także prace związane z ich łączeniem w celu poprawy skuteczności deskryptora.
+
+%---------------------------------------------------------------------------
+\section{Proste deskryptory}
+\label{sec:prosteDeskryptory}
+
+\subsection{HOG}
+Metoda Edge Orientation Histogram (Histogram Orientacji Krawędzi), zaprezentowana po raz pierwszy w pracy \cite{Freeman94} oraz Scale-Invariant Feature Transform (SIFT - Skalo-niezmiennicze przekształcenie cech), przedstawiona w pracy \cite{Lowe04}, stały się inspiracją dla stworzenia metody, którą zaproponowali Navneet Dalal i Bill Triggs w \cite{Dalal05}, której główną ideą jest budowa lokalnych histogramów orientacji krawędzi na przestrzeni całego obrazu. Autorom udało się pokazać, że obecność obiektu i jego kształt można w dobry sposób opisać poprzez lokalny rozkład wartości gradientu i jego orientacji bez znajomości dokładnego położenia krawędzi.
+
+Obraz wejściowy dzielony jest na bloki, które zostają z kolei podzielone na komórki.
+Deskryptor HOG wyliczany jest na podstawie długości i orientacji gradientu wyliczonego na obrazie wejściowym. W każdej komórce budowany jest histogram, w którym cechą jest kąt nachylenia gradientu, a liczebnością suma jego długości. W celu redukcji zjawiska aliasingu, krokiem poprzedzającym dodanie wartości do histogramu powinna być interpolacja, zarówno pomiędzy histogramami w sąsiadujących ze sobą komórkach jak i pomiędzy kątami. Kolejnym ważnym krokiem zaproponowanej metody jest normalizacja histogramów w obrębie bloków. Jest to spowodowane faktem, że w różnych częściach obrazu może się on różnić jasnością, co z kolei skutkuje większy kontrast między tłem a obiektami pierwszego planu, co wpływa na wartość wyliczonego gradientu.
+Ostatecznie, deskryptor dla obrazu wejściowego reprezentowany jest przez połączenie histogramów na przestrzeni całego obrazu.
+
+Aby jednak możliwe było wykrycie obiektu na realnym obrazie, np. pochodzącym z kamery, autorzy stosują metodologię tzw. ruchomego okna, polegającą na podzielenia obrazu na fragmenty obrazu zgodne co do rozmiaru z obrazami treningowymi i dokonania próby detekcji na podstawie deskryptora wyliczonego właśnie w każdym z tych fragmentów.
+
+Dodatkowo, zaproponowane podejście, polegające na niedokładnym odwzorowaniu przestrzeni w deskryptorze (użycie stosunkowo dużych bloków i komórek jako lokalnej reprezentacji obszaru obrazu) i stosunkowo dokładnego odwzorowania kąta nachylenia krawędzi, pozwala na wiarygodną reprezentację obiektów, takich jak sylwetki ludzkie. Wynika to z faktu, że przemieszczenie ciała na obrazie wpływa na zmianę wartości deskryptora w nieznacznym stopniu. Ponadto, aby możliwe było wykrycie obiektu, który na obrazie wejściowym ma inną skalę niż obiekt na obrazie treningowym, konieczne jest także jego kilkukrotne przeskalowanie obrazu wejściowego, a wynik każdego skalowania poddany jest osobnej detekcji tak, jakby był zupełnie niezależnym obrazem wejściowym.
+
+Efektem badań była nowa metoda detekcji obiektów, która bardzo dobrze sprawdzała się w przypadku detekcji ludzi na obrazie w momencie publikacji, tj. w roku 2005, pozwalała na uzyskanie najlepszych wyników z dostępnych w tym czasie metod, przy założeniu że człowiek na obrazie jest wcale lub w niedużym stopniu przysłonięty przez inne obiekty.
+
+Poza nową metodą, dającą bardzo dobre wyniki w detekcji ludzi na obrazie, osiągnięciem związanym z pracą nad \cite{Dalal05} była budowa nowej bazy obrazów ludzi. Baza ta zawiera zbiór 1805 obrazów ludzi, na zróżnicowanym tle i w różnych pozycjach. Dodatkowo, zdjęcia te są niepozowane, co oznacza że ludzie na nich się znajdujący przyjmują szereg naturalnych pozycji ciała. Baza ta jest dostępna pod adresem \cite{INRIA_set}.
+
+Pod względem zróżnicowania baza ta przewyższała dotychczas przygotowane i została później użyta w~wielu badaniach dotyczących detekcji ludzi na obrazie.
+
+%---------------------------------------------------------------------------
+\subsection{Kowariancja cech}
+Deskryptor wykorzystujący do opisu cech inne podejście statystyczne niż histogram został zaprezentowany przez O. Tuzel i in. w pracy \cite{Tuzel06}, polegający na użyciu macierzy kowariancji jako deskryptora cech. Podobnie jednak jak w przypadku metody HOG do opisu pewnego obszaru obrazu używany jest histogram, tak w tej metodzie macierz kowariancji również używana jest jako lokalny deskryptor. Metoda ta z powodzeniem została użyta np. w detekcji ludzi na obrazie, czy do rozpoznania tekstur.
+
+Założeniem metody jest użycie wielu informacji, jakie można wydobyć z obrazu, takich jak wartość piksela czy gradient, przy jednoczesnej redukcji liczby wymiarów jakie są potrzebne do ich zapisania. Metoda polega na ekstrakcji, dla każdego piksela obrazu wejściowego, odpowiadającego mu zestawu kilku cech. Mogą to być np. m.in.: pozycja w poziomie, pozycja w pionie, jasność w skali szarości lub w składowych barwnych, wartość gradientu w każdym z kierunków i wypadkowy kąt nachylenia gradientu.
+Tak jak w przypadku HOG, ponieważ macierz kowariancji opisuje lokalny fragment obrazu, konieczne jest podzielenie obrazu wejściowego na bloki o odpowiednim rozmiarze, a wynikowy deskryptor cech jest złożeniem macierzy kowariancji wyliczonych w obrębie wszystkich takich bloków.
+
+Bardzo ważnym spostrzeżeniem zawartym w pracy \cite{Tuzel06} jest użycie tzw. \textit{integral images} (zsumowany obraz) do obliczenia kowariancji. Dzięki zastosowaniu tej metody, istnieje możliwość obliczenia sumy pikseli dowolnego prostokątnego obszaru obrazu w stałym czasie, co znacznie obniża złożoność implementacji całej metody.
+
+Bardzo podobnie jak w przypadku metody HOG, pojedynczej detekcji obiektu dokonuje się w~zadanym ruchomym oknie, które przesuwane jest po całym, kilkukrotnie przeskalowanym, rzeczywistym obrazie wejściowym.
+
+Efektem pracy \cite{Tuzel06} było zaimplementowanie deskryptora cech, który może być obliczony dużo szybciej i wykrywać obiekty, w tym wypadku ludzi na obrazie, z lepszą skutecznością niż dotychczasowe metody, w tym HOG. Wynika to z faktu, że metoda ta korzysta z większej liczby informacji zawartych na obrazie.
+
+Ponieważ macierz kowariancji nie leży w przestrzeni euklidesowej, a w rozmaitości Riemanna, przed użyciem klasyfikatorów działających w tej pierwszej konieczne jest rzutowanie deskryptora na przestrzeń euklidesową poprzez operację logarytmowania.
+
+%---------------------------------------------------------------------------
+\subsection{LBP}
+Kolejną metodą wykorzystującą lokalne właściwości obrazu, jednak przy użyciu dużo prostszych założeń, jest metoda LBP (Local Binary Patterns - Lokalne Binarne Wzorce). Została ona po raz pierwszy zaprezentowana przez T. Ojalę i innych w pracy \cite{Ojala96}, gdzie została użyta do klasyfikacji tekstur. W późniejszym czasie jednak, została ona użyta z powodzeniem także do innych celów związanych z~detekcją obiektów, takich jak np. do rozpoznawania twarzy w pracy \cite{Ahonen06}, czy do klasyfikacji mimiki twarzy w pracy \cite{Zhao07}.
+
+Deskryptorem w niniejszej metodzie jest histogram, wspólny dla całego opisywanego obrazu, w którym cechą jest liczba naturalna. Ideą metody jest poruszanie się elementem strukturalnym o zadanym rozmiarze $n x n$ (zazwyczaj $n=3$) po całym obrazie i porównywaniem wartości pikseli znajdujących się na jego obwodzie z wartością piksela w jego środku. W przypadku gdy różnica pomiędzy wartościami przekracza wartość zadanego progu w miejscu piksela na obwodzie wstawia się wartość $1$, a w przeciwnym wypadku wartość $0$. W ten sposób, z nowych wartości pikseli na obwodzie buduje się liczbę binarną długości $4(n-1)$ bitów. Następnie, liczebność histogramu dla otrzymanej liczby jest zwiększana o 1.
+
+Kwadratowa złożoność pamięciowa metody, a także możliwość pojawienia się sytuacji, w której dwa bliskoznaczne wzorce klasyfikowane są w odległych od siebie częściach histogramu, sprawia że oryginalna forma metody nie sprawdza się najlepiej w detekcji obiektów. Jej ulepszenie w tym kontekście zostało zaproponowane przez Y. Mu i in. w pracy \cite{Mu08} i polega na reinterpretacji histogramu.
+W ulepszonej metodzie, wyniku operacji z elementem strukturalnym na obrazie nie interpretuje się jako liczby naturalnej, lecz jako łuk o pewnej długości, którego początek tworzy z początkiem układu współrzędnych pewien kąt. Deskryptorem z kolei jest dwuwymiarowy histogram, w którym jedną cechę stanowi długość łuku, a drugą kąt. 
+
+Podobnie jak w poprzednio omówionych metodach, detekcji dokonuje się w ruchomym oknie, przesuwanym po kilkukrotnie przeskalowanym całym wejściowym obrazie.
+
+Wnioskiem płynącym z pracy \cite{Mu08} jest opracowanie metody o niskiej złożoności pamięciowej, osiągającej wyniki lepsze od ww. metod, szczególności w przypadkach, gdy obiekt jest częściowo zasłonięty. Wynika to z faktu, że metoda ta, w odróżnieniu do powyższych, nie opiera się bezpośrednio na obliczaniu gradientu, co może w pewnych przypadkach prowadzić do utraty informacji związanych z~kształtem. 
+
+
+%---------------------------------------------------------------------------
+\subsection{Edgelets}
+Nieco odmienne od zaprezentowanych do tej pory założenie przyjęli autorzy pracy \cite{Wu05} B. Wu~i~R. Nevatia, którzy zdecydowali się wykrywać obiekt, w tym wypadku ponownie człowieka, na obrazie opierając się na informacjach dotyczących różnych części ciała. Takie podejście pozwala na poradzenie sobie z poprawną detekcją obiektu nawet w przypadku, gdy jest on częściowo przysłonięty przez inny~a~dodatkowo czyni to metodę bardziej odporną na zmianę pozycji, w jakiej znajduje się człowiek.
+
+Autorzy do opisu sylwetki ludzkiej wprowadzili nowy rodzaj deskryptora, nazwany przez nich \textit{edgelets}. Edgelet jest to krótki fragment linii lub krzywej. W początkowej fazie dokonuje się generacji wszystkich takich fragmentów, dzięki którym można opisać w mniej lub bardziej wiarygodny sposób analizowaną klasę obiektu. W założeniach autorów, powinno być możliwe ułożenie uśrednionej ludzkiej sylwetki z dostępnych, wygenerowanych wcześniej \textit{edgeletów}.
+Do detekcji używana jest funkcja opisująca podobieństwo pomiędzy wycinkiem obrazu, a kolejnymi \textit{edgeletami}.
+
+Metoda bazuje na obliczeniu podobieństwa pomiędzy gradientem obrazu wejściowego, a fragmentami wzorcowymi, na zasadzie przesuwnego okna. Do obliczenia wartości podobieństwa konieczna jest znajomość wartości gradientu w danym punkcie obrazu, a także obliczenia iloczynu skalarnego między kątem nachylenia krawędzi na obrazie jak i w \textit{edgelecie}. Jednak zastosowane uproszczenie, polegające na mocnej dyskretyzacji kątów nachylenia pozwala na znaczne zmniejszenie złożoności czasowej potrzebnej na obliczenie podobieństwa.
+Co ważne, w fazie treningowej, dokonuje się obliczenia podobieństwa między bazą \textit{edgeletów} nie tylko na całej sylwetce ludzkiej, ale tak jak wspomniano na obszarach odpowiadających torsowi, nogom i głowie z ramionami.
+
+Tak jak w dotychczas już przedstawionych metodach, próba detekcji dokonywana jest w ruchomym oknie, które przesuwane jest po kilkukrotnie przeskalowanym całym obrazie wejściowym.
+
+Efekt badań nad pracą \cite{Wu05} był system pozwalający na wykrywanie ludzi na obrazie, bazujący na częściach ciała, a zatem pozwalający na wykrycie osób zasłoniętych przez inne obiekty nawet w dużym stopniu, w zadowalający sposób.
+Jednak jak przyznali autorzy, skala w jakiej zostały wygenerowane przez nich wzorcowe \textit{edgelety} była przyczyną zbyt wysokiego odsetka nietrafionych detekcji.
+
+
+\section{Złożone deskryptory}
+\label{sec:zlozoneDeskryptory}
+
+Odmienne podejście do rozpoznania obiektu pomiędzy metodami pozwala na wykorzystanie zalet wszystkich metod przy jednoczesnej redukcji ich wad. Dzieje się to jednak kosztem wydłużonego wektora cech w nowym deskryptorze, co nie tylko wpływa na złożoność pamięciową samego deskryptora, ale także wydłuża czas zarówno treningu jak i klasyfikacji w nowo powstałej metodzie.
+
+Przykładem użycia połączonych deskryptorów może być praca G. Gan i J. Cheng \cite{Gan11}, w której to autorzy postanowili połączyć zaprezentowane wyżej metody HOG i LBP.
+Powodem wyboru tych deskryptorów były reprezentacja sylwetki przez kształt i orientację krawędzi w metodzie HOG i reprezentacja tekstur takich jak twarz czy ramiona przez metodę LBP. Połączenie tych dwóch podejść powinno zatem pozwolić na dużo lepszą jakość deskryptora niż w przypadku tych metod działających niezależnie od siebie.
+
+Eksperymenty dowodzą, że istotnie nowy deskryptor cech powstały przez połączenie deskryptorów HOG i LBP ma wyższą skuteczność od obu metod przetestowanych niezależnie od siebie.
+Test przeprowadzono na przykładzie detekcji ludzi na obrazie, z wykorzystaniem wspomnianej już bazy INRIA \cite{INRIA_set}.
+
+\section{Podsumowanie}
+\label{sec:podsumowaniePrace}
+
+Do detekcji obiektów danej klasy na obrazie cyfrowym wykorzystano do tej pory z powodzeniem szereg deskryptorów cech. Różnice między stosowanymi metodami wynikają z informacji z obrazu wejściowego, jakie brane są pod uwagę przy tworzeniu deskryptora, regionu obrazu w jakim liczone są jednorazowo cechy i metody statystycznej służącej do opisu tych cech.
+Metody te różnią się zatem między sobą zarówno złożonością czasową i pamięciową.
+Dodatkowo, informacje z obrazu wejściowego, które brane są pod uwagę w trakcie tworzenia deskryptora mają wpływ na skuteczność detekcji obiektów - np. w jednym scenariuszu lepiej sprawdzać się będą informacje uzyskane na podstawie wyliczonego gradientu, a w drugim na podstawie informacji o jasności.
+
+Ponadto, połączenie deskryptorów pozwalana na jednoczesne uwzględnienie zalet kilku z nich, a co za tym idzie na poprawę skuteczności metody. Odbywa się to jednak kosztem zwiększonej złożoności pamięciowej~i~obliczeniowej.
+

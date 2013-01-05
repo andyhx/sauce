@@ -1,0 +1,89 @@
+\newcommand{\etalchar}[1]{$^{#1}$}
+\begin{thebibliography}{MDK{\etalchar{+}}97}
+
+\bibitem[AMH{\etalchar{+}}06]{Ahonen06}
+Timo Ahonen, Student Member, Abdenour Hadid, Matti Pietikäinen, and Senior
+  Member.
+\newblock Face description with local binary patterns: Application to face
+  recognition.
+\newblock {\em IEEE Transactions on Pattern Analysis and Machine Intelligence},
+  28:2037--2041, 2006.
+
+\bibitem[Bra00]{opencv_library}
+G.~Bradski.
+\newblock {The OpenCV Library}.
+\newblock {\em Dr. Dobb's Journal of Software Tools}, 2000.
+
+\bibitem[CV95]{Cortes95}
+Corinna Cortes and Vladimir Vapnik.
+\newblock Support-vector networks.
+\newblock In {\em Machine Learning}, pages 273--297, 1995.
+
+\bibitem[DT05]{Dalal05}
+Navneet Dalal and Bill Triggs.
+\newblock Histograms of oriented gradients for human detection.
+\newblock In Cordelia Schmid, Stefano Soatto, and Carlo Tomasi, editors, {\em
+  International Conference on Computer Vision \& Pattern Recognition},
+  volume~2, pages 886--893, INRIA Rh\^one-Alpes, ZIRST-655, av. de l'Europe,
+  Montbonnot-38334, June 2005.
+
+\bibitem[FR94]{Freeman94}
+William~T. Freeman and Michal Roth.
+\newblock Orientation histograms for hand gesture recognition.
+\newblock Technical report, Mitsubishi Electric Research Labs., 201, 1994.
+
+\bibitem[GC11]{Gan11}
+Guolong Gan and Jian Cheng.
+\newblock Pedestrian detection based on hog-lbp feature.
+\newblock In {\em Computational Intelligence and Security (CIS), 2011 Seventh
+  International Conference on}, pages 1184 --1187, dec. 2011.
+
+\bibitem[INR]{INRIA_set}
+Inria person dataset - shttp://pascal.inrialpes.fr/data/human/.
+
+\bibitem[Low04]{Lowe04}
+David~G. Lowe.
+\newblock Distinctive image features from scale-invariant keypoints.
+\newblock {\em International Journal of Computer Vision}, 60:91--110, 2004.
+
+\bibitem[MDK{\etalchar{+}}97]{Martin97thedet}
+A.~Martin, G.~Doddington, T.~Kamm, M.~Ordowski, and M.~Przybocki.
+\newblock The det curve in assessment of detection task performance.
+\newblock pages 1895--1898, 1997.
+
+\bibitem[MYL{\etalchar{+}}08]{Mu08}
+Yadong Mu, Shuicheng Yan, Yi~Liu, T.~Huang, and Bingfeng Zhou.
+\newblock Discriminative local binary patterns for human detection in personal
+  album.
+\newblock In {\em Computer Vision and Pattern Recognition, 2008. CVPR 2008.
+  IEEE Conference on}, pages 1 --8, june 2008.
+
+\bibitem[OPH96]{Ojala96}
+Timo Ojala, Matti Pietik\"{a}inen, and David Harwood.
+\newblock {A comparative study of texture measures with classification based on
+  featured distributions}.
+\newblock {\em Pattern Recognition}, 29(1):51--59, January 1996.
+
+\bibitem[TPM06]{Tuzel06}
+Oncel Tuzel, Fatih Porikli, and Peter Meer.
+\newblock Region covariance: A fast descriptor for detection and
+  classification.
+\newblock In {\em In Proc. 9th European Conf. on Computer Vision}, pages
+  589--600, 2006.
+
+\bibitem[WN05]{Wu05}
+Bo~Wu and Ram Nevatia.
+\newblock Detection of multiple, partially occluded humans in a single image by
+  bayesian combination of edgelet part detectors.
+\newblock In {\em Proceedings of the Tenth IEEE International Conference on
+  Computer Vision (ICCV'05) Volume 1 - Volume 01}, ICCV '05, pages 90--97,
+  Washington, DC, USA, 2005. IEEE Computer Society.
+
+\bibitem[ZP07]{Zhao07}
+Guoying Zhao and M.~Pietikainen.
+\newblock Dynamic texture recognition using local binary patterns with an
+  application to facial expressions.
+\newblock {\em Pattern Analysis and Machine Intelligence, IEEE Transactions
+  on}, 29(6):915 --928, june 2007.
+
+\end{thebibliography}

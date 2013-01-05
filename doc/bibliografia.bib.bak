@@ -1,0 +1,193 @@
+% This file was created with JabRef 2.8.1.
+% Encoding: UTF-8
+
+@ARTICLE{Ahonen06,
+  author = {Timo Ahonen and Student Member and Abdenour Hadid and Matti Pietikäinen
+	and Senior Member},
+  title = {Face description with local binary patterns: Application to face
+	recognition},
+  journal = {IEEE Transactions on Pattern Analysis and Machine Intelligence},
+  year = {2006},
+  volume = {28},
+  pages = {2037--2041},
+  owner = {studzien},
+  timestamp = {2012.11.04}
+}
+
+@BOOK{Brad08,
+  title = {{Learning OpenCV: Computer Vision with the OpenCV Library}},
+  publisher = {O'Reilly},
+  year = {2008},
+  author = {Bradski, Gary and Kaehler, Adrian},
+  address = {Cambridge, MA},
+  abstract = {{Learning OpenCV puts you right in the middle of the rapidly expanding
+	field of computer vision. Written by the creators of OpenCV, the
+	widely used free open- source library, this book introduces you to
+	computer vision and demonstrates how you can quickly build applications
+	that enable computers to "see" and make decisions based on the data.
+	Computer vision is everywhere -- in security systems, manufacturing
+	inspection systems, medical image analysis, Unmanned Aerial Vehicles,
+	and more. It helps robot cars drive by themselves, stitches Google
+	maps and Google Earth together, checks the pixels on your laptop's
+	LCD screen, and makes sure the stitches in your shirt are OK. OpenCV
+	provides an easy-to-use computer vision infrastructure along with
+	a comprehensive library containing more than 500 functions that can
+	run vision code in real time. With Learning OpenCV, any developer
+	or hobbyist can get up and running with the framework quickly, whether
+	it's to build simple or sophisticated vision applications. The book
+	includes: A thorough introduction to OpenCV Getting input from cameras
+	Transforming images Shape matching Pattern recognition, including
+	face detection Segmenting images Tracking and motion in 2 and 3 dimensions
+	Machine learning algorithms Hands-on exercises at the end of each
+	chapter help you absorb the concepts, and an appendix explains how
+	to set up an OpenCV project in Visual Studio. OpenCV is written in
+	performance optimized C/C++ code, runs on Windows, Linux, and Mac
+	OS X, and is free for commercial and research use under a BSD license.
+	Getting machines to see is a challenging but entertaining goal. If
+	you're intrigued by the possibilities, Learning OpenCV gets you started
+	onbuilding computer vision applications of your own.}},
+  citeulike-article-id = {3502180},
+  keywords = {opencv, vision},
+  owner = {studzien},
+  posted-at = {2008-11-11 02:28:18},
+  priority = {2},
+  timestamp = {2012.10.28}
+}
+
+@INPROCEEDINGS{Dalal05,
+  author = {Navneet Dalal and Bill Triggs},
+  title = {Histograms of Oriented Gradients for Human Detection},
+  booktitle = {International Conference on Computer Vision \& Pattern Recognition},
+  year = {2005},
+  editor = {Cordelia Schmid and Stefano Soatto and Carlo Tomasi},
+  volume = {2},
+  pages = {886-893},
+  address = {INRIA Rh\^one-Alpes, ZIRST-655, av. de l'Europe, Montbonnot-38334},
+  month = {June},
+  keywords = {LEAR, ACEMEDIA, LAVA},
+  owner = {studzien},
+  timestamp = {2012.11.04},
+  url = {http://lear.inrialpes.fr/pubs/2005/DT05}
+}
+
+@TECHREPORT{Freeman94,
+  author = {William T. Freeman and Michal Roth},
+  title = {Orientation histograms for hand gesture recognition},
+  institution = {Mitsubishi Electric Research Labs., 201},
+  year = {1994},
+  owner = {studzien},
+  timestamp = {2012.11.05}
+}
+
+@ARTICLE{Lowe04,
+  author = {David G. Lowe},
+  title = {Distinctive Image Features from Scale-Invariant Keypoints},
+  journal = {International Journal of Computer Vision},
+  year = {2004},
+  volume = {60},
+  pages = {91--110},
+  owner = {studzien},
+  timestamp = {2012.11.05}
+}
+
+@INPROCEEDINGS{Mu08,
+  author = {Yadong Mu and Shuicheng Yan and Yi Liu and Huang, T. and Bingfeng
+	Zhou},
+  title = {Discriminative local binary patterns for human detection in personal
+	album},
+  booktitle = {Computer Vision and Pattern Recognition, 2008. CVPR 2008. IEEE Conference
+	on},
+  year = {2008},
+  pages = {1 -8},
+  month = {june},
+  doi = {10.1109/CVPR.2008.4587800},
+  issn = {1063-6919},
+  keywords = {Fourier- LBP;INRIA human database;Semantic-LBP;discriminative local
+	binary patterns;gradient based local features;human detection;object
+	detection;object recognition;personal album;random ensemble algorithm;semantic
+	consistency;face recognition;feature extraction;},
+  owner = {studzien},
+  timestamp = {2012.11.04}
+}
+
+@ARTICLE{Ojala96,
+  author = {Ojala, Timo and Pietik\"{a}inen, Matti and Harwood, David},
+  title = {{A comparative study of texture measures with classification based
+	on featured distributions}},
+  journal = {Pattern Recognition},
+  year = {1996},
+  volume = {29},
+  pages = {51--59},
+  number = {1},
+  month = jan,
+  abstract = {{This paper evaluates the performance both of some texture measures
+	which have been successfully used in various applications and of
+	some new promising approaches proposed recently. For classification
+	a method based on Kullback discrimination of sample and prototype
+	distributions is used. The classification results for single features
+	with one-dimensional feature value distributions and for pairs of
+	complementary features with two-dimensional distributions are presented}},
+  citeulike-article-id = {8254898},
+  citeulike-linkout-0 = {http://dx.doi.org/10.1016/0031-3203(95)00067-4},
+  doi = {10.1016/0031-3203(95)00067-4},
+  issn = {00313203},
+  keywords = {classification, lbp, texture},
+  owner = {studzien},
+  posted-at = {2010-11-16 16:12:31},
+  priority = {2},
+  timestamp = {2012.11.04},
+  url = {http://dx.doi.org/10.1016/0031-3203(95)00067-4}
+}
+
+@INPROCEEDINGS{Tuzel06,
+  author = {Oncel Tuzel and Fatih Porikli and Peter Meer},
+  title = {Region Covariance: A Fast Descriptor for Detection And Classification},
+  booktitle = {In Proc. 9th European Conf. on Computer Vision},
+  year = {2006},
+  pages = {589--600},
+  owner = {studzien},
+  timestamp = {2012.11.05}
+}
+
+@INPROCEEDINGS{Wu05,
+  author = {Wu, Bo and Nevatia, Ram},
+  title = {Detection of Multiple, Partially Occluded Humans in a Single Image
+	by Bayesian Combination of Edgelet Part Detectors},
+  booktitle = {Proceedings of the Tenth IEEE International Conference on Computer
+	Vision (ICCV'05) Volume 1 - Volume 01},
+  year = {2005},
+  series = {ICCV '05},
+  pages = {90--97},
+  address = {Washington, DC, USA},
+  publisher = {IEEE Computer Society},
+  acmid = {1097633},
+  doi = {10.1109/ICCV.2005.74},
+  isbn = {0-7695-2334-X-01},
+  numpages = {8},
+  owner = {studzien},
+  timestamp = {2012.11.04},
+  url = {http://dx.doi.org/10.1109/ICCV.2005.74}
+}
+
+@ARTICLE{Zhao07,
+  author = {Guoying Zhao and Pietikainen, M.},
+  title = {Dynamic Texture Recognition Using Local Binary Patterns with an Application
+	to Facial Expressions},
+  journal = {Pattern Analysis and Machine Intelligence, IEEE Transactions on},
+  year = {2007},
+  volume = {29},
+  pages = {915 -928},
+  number = {6},
+  month = {june },
+  doi = {10.1109/TPAMI.2007.1110},
+  issn = {0162-8828},
+  keywords = {dynamic texture recognition;facial expressions;facial image analysis;volume
+	local binary patterns;face recognition;image texture;Algorithms;Artificial
+	Intelligence;Biometry;Computer Security;Face;Facial Expression;Humans;Image
+	Enhancement;Image Interpretation, Computer-Assisted;Pattern Recognition,
+	Automated;Reproducibility of Results;Sensitivity and Specificity;Signal
+	Processing, Computer-Assisted;Video Recording;},
+  owner = {studzien},
+  timestamp = {2012.11.04}
+}
+

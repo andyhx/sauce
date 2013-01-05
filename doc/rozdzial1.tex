@@ -1,0 +1,97 @@
+\chapter{Wprowadzenie}
+\label{cha:wprowadzenie}
+
+W rozdziale tym zaprezentowano ogólne cele i wyzwania związane z tworzeniem automatycznych systemów wizyjnych oraz przedstawiono znaczenie detekcji obiektów w tychże systemach.
+Wymieniono także cele, dla jakich powstała niniejsza praca, a także streszczono jej zawartość na przestrzeni kolejnych rozdziałów. 
+
+%---------------------------------------------------------------------------
+
+\section{Wykorzystanie komputerowych systemów wizyjnych}
+\label{sec:systemy}
+
+Dzięki coraz niższym cenom kamer cyfrowych wysokiej rozdzielczości, a także wyższej dostępności komputerów o dużej mocy obliczeniowej, temat budowy komputerowych systemów wizyjnych zyskał w ostatnich czasach dużą popularność. To rosnące powodzenie z kolei, była motywacją do dużego, niespotykanego do tej pory, zainteresowania rozwojem w dziedzinie algorytmów związanych z przetwarzaniem i rozpoznawaniem obrazów. Efektem tego było powstanie, na przestrzeni ostatnich kilkunastu lat, w wielu ośrodkach badawczych na całym świecie, wielu propozycji metod do realizacji konkretnych zadań związanych z automatycznym rozpoznawaniem wizji, z których wiele z nich zostało użytych z~powodzeniem w praktyce.
+
+Wśród dziedzin, którym szybki rozwój systemów wizyjnych przynosi najwięcej korzyści można wymienić m.in.:
+\begin{itemize}
+\item informatykę\\*
+na systemach wizyjnych swą budowę opierają interfejsy multimodalne, rozpoznające np. gesty wykonywane przez operatora;
+\item automatykę\\*
+systemy wizyjne są podstawą działania robotów potrafiących podejmować decyzje na podstawie danych o świecie zewnętrznym;
+\item komunikację\\*
+dzięki systemom wizyjnym można pozyskiwać dane o natężeniu ruchu i na jego podstawie np. dynamicznie sterować sygnalizacją świetlną;
+\item przemysł samochodowy\\*
+systemy wizyjne wykorzystywane są w systemach zwiększających bezpieczeństwo jazdy, np. wykrywające znaki drogowe;
+\item systemy monitoringu\\*
+systemy wizyjne pozwalają na automatyczne wykrycie podejrzanych zachowań np. na lotnisku.
+\end{itemize}
+
+Głównym zadaniem komputerowego systemu wizyjnego jest wyodrębnienie z zadanego obrazu, statycznego bądź ruchomego, pewnej informacji a następnie wykonanie na jej podstawie pewnej czynności, najczęściej specyficznej dla konkretnego systemu.
+Zadanie to jest realizowane za pomocą kilku etapów, które mają na celu jak największe upodobnienie działania takiego systemu do ludzkiego widzenia:
+\begin{itemize}
+\item akwizycji obrazu;
+\item przetwarzania wstępnego obrazu;
+\item analizy obrazu;
+\item rozpoznania obrazu;
+\item podjęcia decyzji.
+\end{itemize}
+
+W przypadku ludzkiego zmysłu wzroku, którego każdego dnia używamy wielokrotnie we wszystkich czynnościach życiowych, nie mamy nawet świadomości ich istnienia. Dzieje się tak dlatego, że wykonywane są one przez mózg w sposób bardzo szybki i naturalny.
+Jednak tworząc sztuczny system wizyjny musimy mieć świadomość złożoności procesu jaki prowadzi do podjęcia decyzji na podstawie obrazu. Dodatkowym jego utrudnieniem niech będzie fakt, że do tej pory sposób, w jaki ludzki mózg dokonuje analizy obrazu otrzymanego od narządu wzroku, nie został dokładnie zbadany.\\*
+Oprócz tego, do niedoskonałości sztucznych systemów wizyjnych można zaliczyć m.in.
+\begin{itemize}
+\item niedoskonałość kamer, np. powstawanie szumów;
+\item utratę informacji w trakcie projekcji obrazu trójwymiarowego na dwuwymiarowy;
+\item zmiany oświetlenia obserwowanej sceny;
+\item częściowe lub całkowite zasłonięcie obiektów na scenie.
+\end{itemize}
+
+Na dłuższą metę jednak, użycie komputerowych systemów wizyjnych niesie za sobą wiele korzyści w zastosowaniach, w których zostały one już dobrze sprawdzone i istnieje możliwość zastąpienia nimi ludzkiego zmysłu wzroku.\\*
+
+Należą do nich m.in:
+\begin{itemize}
+\item eliminacja błędów ludzkich wynikających z takich czynników jak np. stres;
+\item możliwość rozpoznawania obrazów poza zakresem światła widzialnego;
+\item możliwość umieszczenia systemu w miejscach niedostępnych lub nieopłacalnych dla człowieka;
+\item krótki czas reakcji.
+\end{itemize}
+
+%---------------------------------------------------------------------------
+
+\section{Znaczenie detekcji obiektów w komputerowych systemach wizyjnych}
+\label{sec:detekcjaWSystemach}
+
+Jak wspomniano wyżej, w wielu swoich zastosowaniach systemy wizyjne opierają swoje działanie na detekcji pewnych obiektów na obrazie.
+Jest to jednak jeden z najbardziej wymagających problemów widzenia automatycznego, ze względu na to, że na dwuwymiarowym rzucie obiektu na obraz, który dostępny jest do analizy, interesujący nas obiekt zmienia swój kształt w czasie, staje się on częściowo przysłonięty czy zmienia się poziom jego oświetlenia.
+W wielu przypadkach sama detekcja obiektu na obrazie jest tylko jednym z elementów działania odpowiedniego systemu wizyjnego. Na przykład w~przypadku systemu, którego zadaniem jest analiza sposobu chodu człowieka, analiza taka dokonywana jest dopiero po wcześniejszym wykryciu obecności człowieka w zadanej strefie przez odpowiedni system detekcji.
+Do innych zastosowań takich systemów zaliczają się np.: detekcja przechodniów~w~inteligentnych systemach prowadzenia pojazdów czy detekcja obiektów znajdujących się w zabronionej strefie (np. osoby niepożądanej na terenie prywatnym czy pozostawionej walizki na lotnisku).
+
+Jak łatwo zauważyć, rozpoznanie konkretnych obiektów ma szerokie zastosowanie np. w systemach monitoringu, gdzie omyłkowe podniesienie alarmu w~sytuacji potencjalnego zagrożenia może mieć znaczne konsekwencje. Dlatego też, niejednokrotnie, starając się opracować metodę wykrywającą pewną klasę obiektów na obrazie, poza osiągnięciem jak najlepszej trafności metody, szczególnie dużą uwagę poświęca się maksymalnie możliwemu wyeliminowaniu odsetku niepoprawnych detekcji.
+
+Dodatkowym wyzwaniem dla autorów metod detekcji obiektów jest fakt, że nie istnieje rozwiązanie sprawdzające się tak samo dobrze dla każdej klasy poszukiwanych obiektów. Wynika to z faktu istnienia różnych deskryptorów dla różnych klas obiektów, a także różnych metod klasyfikacji, dzięki którym można w dobrym stopniu odróżnić obiekt należący do danej klasy od obiektu, który do niej nie należy (w przypadku detekcji człowieka może to być np. pewien sposób opisu sylwetki jego ciała, podczas gdy inny rodzaj obiektu będzie wykrywany w dużo lepszym stopniu wykorzystując informację o kolorze). Dlatego też, w momencie budowy systemu wizyjnego przeznaczonego do detekcji konkretnej klasy obiektów, jego autorzy często zmuszeni są do przeprowadzenia szeregu badań w celu wybrania jak najlepszych deskryptorów dla danego problemu i wprowadzenia potencjalnych ulepszeń do istniejących już metod tak, aby w ich konkretnym zastosowaniu sprawdzały się jak najlepiej.
+
+%---------------------------------------------------------------------------
+
+\section{Rola deskryptorów cech w rozpoznawaniu obrazów}
+\label{sec:deskryptory}
+
+Obliczenie deskryptora cech polega na pewnym zmniejszeniu wymiarów potrzebnych do opisu pewnego zjawiska. Dobrze zbudowany deskryptor cech powinien działać w taki sposób, aby w procesie redukcji ilości informacji pomijać np. dane, których obecność powielona jest w kilku miejscach wejścia, ale przede wszystkim pomijać te dane, które są bezużyteczne w kontekście danego problemu. Dobry deskryptor cech powinien także dodatkowo eksponować te informacje, które są najważniejsze dla danego problemu, tak aby, mając do dyspozycji tylko i wyłącznie wynik jego działania, można było w nieskomplikowany sposób stwierdzić jakich danych wejściowych użyto do jego obliczenia.
+
+Głównym powodem użycia deskryptorów cech jest zdecydowanie mniejsza złożoność czasowa~i pamięciowa potrzebna do ich przetworzenia przez klasyfikator. Ma to szczególne znaczenie w przypadku zadania rozpoznawania obrazów, gdzie na wejściu zazwyczaj otrzymuje się obraz, często w wysokiej rozdzielczości. W takim wypadku analiza "piksel po pikselu" jest zbyt wymagająca czasowo, by można jej użyć w rzeczywistych systemach rozpoznawania obrazów. W celu poradzenia sobie z tym problemem, szuka się odpowiednich deskryptorów cech, które w dobry sposób zawierają w sobie informacje z obrazu wejściowego ważne w kontekście zadania konkretnego systemu wizyjnego.
+
+%---------------------------------------------------------------------------
+
+\section{Cele pracy}
+\label{sec:celePracy}
+
+Celem niniejszej pracy jest bezpośrednie porównanie wybranych deskryptorów cech używanych w~metodach detekcji obiektów na obrazie cyfrowym. Zbadanie działania deskryptorów na dokładnie tym samym zestawie obrazów testowych i używając tego samego sposobu dokonywania klasyfikacji pozwoli w sposób wiarygodny porównać deskryptory pod względem jakościowym w zależności od charakterystyki klasy poszukiwanych obiektów, a także pod względem złożoności czasowej i pamięciowej. Dodatkowym celem pracy jest próba połączenia kilku z wybranych deskryptorów w jeden bardziej złożony i odpowiedź na pytanie czy można uzyskać rozsądną poprawę skuteczności detekcji obiektu konkretnej klasy na obrazie.
+
+
+%---------------------------------------------------------------------------
+
+\section{Zawartość pracy}
+\label{sec:zawartoscPracy}
+
+W rozdziale~\ref{cha:prace} przedstawiono przegląd prac naukowych związanych z automatyczną detekcją obiektów na obrazie, ze szczególnym uwzględnieniem metod wykorzystujących deskryptory cech. W rozdziale~\ref{cha:metodologia} zaprezentowano użyte w testach zestawy obrazów, metodologię przeprowadzonych testów, sposób implementacji środowiska testowego, a także sposoby zbierania wyników do dalszej analizy.\\*
+W rozdziale~\ref{cha:deskryptory} opisano, w sposób szczegółowy, zasady działania wybranych metod, sposób ich implementacji, a także zestawiono i przeanalizowano wyniki testów, jakim zostały poddane.\\*
+W rozdziale~\ref{cha:laczenie} zaprezentowano propozycje połączenia wybranych deskryptorów, analizując potencjalne korzyści jakie może nieść dane połączenie. Dodatkowo przeanalizowano i opisano wyniki testów, jakim zostały poddane kombinacje deskryptorów.\\*
+W rozdziale~\ref{cha:wnioski} podsumowano testy przeprowadzone w rozdziałach~\ref{cha:deskryptory}~i~\ref{cha:laczenie} i wyciągnięto wnioski na temat potencjalnych zastosowań przeanalizowanych metod.

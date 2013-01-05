@@ -1,0 +1,56 @@
+This is BibTeX, Version 0.99c (TeX Live 2009/Debian)
+The top-level auxiliary file: praca.aux
+A level-1 auxiliary file: rozdzial1.aux
+A level-1 auxiliary file: rozdzial2.aux
+A level-1 auxiliary file: rozdzial3.aux
+A level-1 auxiliary file: rozdzial4.aux
+A level-1 auxiliary file: rozdzial5.aux
+A level-1 auxiliary file: rozdzial6.aux
+The style file: alpha.bst
+Database file #1: bibliografia.bib
+Warning--entry type for "INRIA_set" isn't style-file defined
+--line 251 of file bibliografia.bib
+Warning--to sort, need author or key in INRIA_set
+Warning--empty booktitle in Martin97thedet
+You've used 14 entries,
+            2543 wiz_defined-function locations,
+            663 strings with 7109 characters,
+and the built_in function-call counts, 6571 in all, are:
+= -- 665
+> -- 297
+< -- 10
++ -- 101
+- -- 100
+* -- 457
+:= -- 1018
+add.period$ -- 41
+call.type$ -- 14
+change.case$ -- 92
+chr.to.int$ -- 14
+cite$ -- 17
+duplicate$ -- 275
+empty$ -- 488
+format.name$ -- 112
+if$ -- 1405
+int.to.chr$ -- 1
+int.to.str$ -- 0
+missing$ -- 12
+newline$ -- 72
+num.names$ -- 41
+pop$ -- 95
+preamble$ -- 1
+purify$ -- 105
+quote$ -- 0
+skip$ -- 255
+stack$ -- 0
+substring$ -- 410
+swap$ -- 83
+text.length$ -- 10
+text.prefix$ -- 2
+top$ -- 0
+type$ -- 112
+warning$ -- 2
+while$ -- 63
+width$ -- 19
+write$ -- 182
+(There were 3 warnings)
